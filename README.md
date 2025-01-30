@@ -1,4 +1,4 @@
-# vbp-datapublication-citizenscience
+# vbp-GBIF-datapublication-citizenscience
 repository for citizen science datapublication
 
 Scripts to map citizen science data of various sources to Darwin Core
