@@ -1,6 +1,6 @@
 ---
 title: "Darwin Core Mapping"
-subtitle: "VBP-GBIF data downloaded from various wnmn profiel"
+subtitle: "VBP-GBIF data downloaded from various wnmn profiel -fork mica W-Vl ~species group bijen wespen en mieren"
 author: "Dimitri Brosens"
 date: "`r Sys.Date()`"
 output:
@@ -48,10 +48,66 @@ some columns renamed to DwC term
 File exported to csv
 
 
+
+
 ```{r}
 csv_files <- list.files(here::here("datasets", "np-profile-download", "data", "raw"), pattern = "*.csv$", full.names = TRUE)
 
 ```
+
+```{r eval=FALSE, include=FALSE}
+read_and_add_filename <- function(file) {
+  observerN <- read_csv(file)
+  observerN$filename <- basename(file)  # Volledige bestandsnaam toevoegen als kolom
+  observerN
+}
+```
+
+# Data inlezen en samenvoegen
+```{r eval=FALSE, include=FALSE}
+data <- map_dfr(csv_files, read_and_add_filename)
+
+```
+
+
+
+# Lijst van CSV-bestanden ophalen
+```{r eval=FALSE, include=FALSE}
+csv_files <- list.files(here("datasets", "np-profile-download", "data", "raw"), 
+                        pattern = "\\.csv$", full.names = TRUE)
+```
+
+
+# Functie om een bestand in te lezen en het relevante deel van de bestandsnaam toe te voegen
+```{r}
+read_and_add_filename <- function(file) {
+  df <- read_csv(file)
+  # Bestandsnaam zonder pad
+  filename <- basename(file)
+  
+  # Deel na 'observations-' tot aan het volgende '-'
+  extracted_part <- str_extract(filename, "(?<=observations-)[^\\-]+-[^\\-]+")
+  
+  # Toevoegen aan dataframe
+  df$Extracted <- extracted_part
+  df
+}
+  
+```
+
+  
+ 
+
+# Data inlezen en samenvoegen
+```{r}
+data <- map_dfr(csv_files, read_and_add_filename)
+
+```
+
+# Resultaat bekijken
+
+
+
 
 ```{r}
 data <- lapply(csv_files, read_csv) %>% bind_rows()
@@ -67,27 +123,6 @@ input_interim <- data
 ```
 
 
-```{r}
-
-#datafile V1
-#input_interim <- read_csv(here::here("datasets", "mica-rato-occurrences", "data", "interim", "RATO_data_RAW_Refine.csv"))
-
-#datafile update 1
-
-#input_interim <- read_excel(here::here("datasets", "mica-westvlaanderen-occurrences", "data", "raw", #"registrations-15-7-2022-14_27_43.xlsx"))
-
-#input_interim <- read.csv2(here::here("datasets", "mica-rato-occurrences", "data", "raw", "RATOgegevensbackoffice2020V2.txt" #), sep = ";")
-
-#deze werkt
-#input_interim <- read_delim(file = here::here("datasets", "mica-rato-occurrences", "data", "raw", #"RATOgegevensbackoffice2020V2.txt"), ";", escape_double = FALSE, trim_ws = TRUE )
-
-#input_interim_old <- read_delim(here::here("datasets", "mica-rato-occurrences", "data", "raw", "RATOgegevensbackoffice2020V2.txt" ), ";")
-
-#input_interim <- read_delim(here::here("datasets", "mica-rato-occurrences", "data", "raw", "2022_vangsten_nov_2021_update.csv" ), ",")
-
-
-
-```
 
 Preview data:
 
@@ -111,129 +146,11 @@ input_interim %>% head(n = 5)
 
 # Georeference source data
 
-```{r}
-input_interim %<>%
-        filter(kind_nl == 'Bruine rat' | kind_nl == 'Muskusrat') 
-        
-#head (occurrence, n = 5 )
-
-```
-
-
 ## Lambert to Decimals
 
 ### Keep original x,Y as verbatimcoordinates
 
-We want to keep the original verbatim Coordinates
-The original X,Y will be used for creating decimalLatitude and decimalLongitude
 
-```{r}
-input_interim$x <- as.character(input_interim$x)
-```
-
-```{r}
-input_interim$x <- substr(input_interim$x, 1, 5)
-```
-
-```{r}
-input_interim$x <- as.numeric(input_interim$x)
-```
-
-
-```{r}
-input_interim$y <- as.character(input_interim$y)
-```
-
-```{r}
-input_interim$y <- substr(input_interim$y, 1, 6)
-```
-
-```{r}
-input_interim$y <- as.numeric(input_interim$y)
-```
-
-
-
-
-
-
-
-```{r}
-input_interim %<>% mutate(verbatimLongitud = (x)) %>%
-                   mutate(verbatimLatitud = (y)) 
-                   
-```
-```{r}
-input_interim %<>% mutate(verbatimLongitude = (x)) %>%
-                   mutate(verbatimLatitude = (y)) 
-                   
-```
-
-
-
-### Create a spacial dataframe
-
-Create spatial dataframe and define the CRS (31370 is Belgian Lambert 72)
-We indicate the x,y columns as coordinates and define the coordinate system
-
-```{r}
-input_interim = st_as_sf(input_interim, coords = c("verbatimLongitud","verbatimLatitud"), crs = 31370 , agr = "constant" )
-input_interim %>% head(n = 5)
-```
-
-## Transform the data in WGS84
-
-Now we transform the Lambert 72 in WGS84
-
-```{r}
-input_interim <- st_transform(input_interim, crs = 4326)
-input_interim %>% head(n = 5)
-```
-
-### Create a dataframe with column decimalLatitude & decimalLongitude
-
-In order to add the decimal coordinates into the original df we create an x_y dataframe
-
-```{r}
-x_y <- as.data.frame(st_coordinates(input_interim))
-x_y %>% head(n = 5)
-
-write_csv(x_y, here::here("datasets", "mica-rato-occurrences", "data", "interim", "x_y.csv"), na = "")
-```
-
-# Create extra dataframe to work with 
-
-```{r}
-input_interim_df <- input_interim
-```
-
-# Remove geometry from dataframe 'input_interim_df'
-
-We remove all geometry from the spacial dataframe, to create a normal df
-
-```{r}
-st_geometry(input_interim_df) <- NULL
-
-input_interim_df %>% head(n = 5)
-```
-
-### Bind columns x_y and input_interim_df
-
-Join both df's to have the decimalLat & Lon
-
-```{r}
-input_interim_df = bind_cols(input_interim_df,x_y, .id = NULL)
-
-input_interim_df %>% head(n = 5)
-```
-
-### Integrate x-y coordinates in original dataframe
-
-We can safely substitute input_interim 
-
-```{r}
-input_interim <- input_interim_df
-```
 
 # Occurrence core
 
@@ -248,15 +165,17 @@ occurrence <- input_interim
 ## remove obsolete columns
 
 ```{r}
-occurrence %<>% select(-c(domain_fr, domain_en, domain_nl, kind_fr, kind_en))
+occurrence %<>% select(-c(modified))
 ```
 ## filter for muskrat & bruine rat
 
+Define which group of species to map to DwC
+
 ```{r}
 occurrence %<>%
-        filter(kind_nl == 'Bruine rat' | kind_nl == 'Muskusrat') 
+        filter(`species group` == 'Bijen, wespen en mieren') 
         
-head (occurrence, n = 5 )
+head(occurrence, n = 5 )
 
 ```
 
@@ -306,7 +225,7 @@ occurrence %<>% mutate(license = "http://creativecommons.org/publicdomain/zero/1
 ### rightsHolder
 
 ```{r}
-occurrence %<>% mutate(rightsHolder = "Province of West Flanders") # e.g. "INBO"
+occurrence %<>% mutate(rightsHolder = "Research Institute for Nature and Forest") # e.g. "INBO"
 ```
 ### accessRights
 
@@ -329,7 +248,7 @@ occurrence %<>% mutate(institutionCode = "INBO") # e.g. "INBO"
 ### datasetName
 
 ```{r}
-occurrence %<>% mutate(datasetName = "MICA - Muskrat occurrences collected in West Flanders, Belgium") # e.g. "Checklist of non-native freshwater fishes in Flanders, Belgium"
+occurrence %<>% mutate(datasetName = "VBP - Occurrences of Bees, wasps, and ants (Apidae, Vespidae, Sphecidae and Formicidae in  Flanders, Belgium") # e.g. "Checklist of non-native freshwater fishes in Flanders, Belgium"
 ```
 
 The following terms contain information about the taxon:
@@ -347,8 +266,7 @@ occurrence %<>% mutate(basisOfRecord = "HumanObservation")
 ### occurrenceID
 
 ```{r}
-occurrence %<>% rename(occurrenceID = 'id') %>%
-                mutate(occurrenceID = str_c("MICA:W-VL:", occurrenceID, ":", ID_row))
+occurrence %<>% mutate(occurrenceID = str_c("VBP:OCC:WNMN", id , ":", link))
   
 ```
 
