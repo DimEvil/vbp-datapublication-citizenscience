@@ -85,7 +85,7 @@ read_and_add_filename <- function(file) {
   
   # Deel na 'observations-' tot aan het volgende '-'
   extracted_part <- str_extract(filename, "(?<=observations-)([^\\-]+)-[^\\-]+") %>% 
-  gsub("-", " ", .)
+  gsub("-", " ", .) %>% gsub(".csv", " ",.)
   
   # Toevoegen aan dataframe
   df$Extracted <- extracted_part
@@ -103,6 +103,10 @@ data <- map_dfr(csv_files, read_and_add_filename)
 
 ```
 
+```{r eval=FALSE, include=FALSE}
+data <- lapply(csv_files, read_csv) %>% bind_rows()
+```
+
 # Resultaat bekijken
 
 ```{r}
@@ -111,9 +115,6 @@ head(data)
 
 
 
-```{r}
-data <- lapply(csv_files, read_csv) %>% bind_rows()
-```
 
 
 ```{r}
