@@ -195,7 +195,7 @@ Start with record-level terms which contain metadata about the dataset (which is
 ### datasetID
 
 ```{r}
-occurrence %<>% mutate(datasetID = "https://doi.org/10.15468/XXXXX")
+occurrence %<>% mutate(dwc_datasetID = "https://doi.org/10.15468/XXXXX")
 ```
 
 ### add row numbers to genrate occurrenceID unique
@@ -209,31 +209,31 @@ occurrence %<>% mutate(ID_row = row_number())
 ### type
 
 ```{r}
-occurrence %<>% mutate(type = "Event")
+occurrence %<>% mutate(dwc_type = "Event")
 ```
 
 ### language
 
 ```{r}
-occurrence %<>% mutate(language = "en") # e.g. "en"
+occurrence %<>% mutate(dwc_language = "en") # e.g. "en"
 ```
 
 ### license
 
 ```{r}
-occurrence %<>% mutate(license = "http://creativecommons.org/publicdomain/zero/1.0/") 
+occurrence %<>% mutate(dwc_license = "http://creativecommons.org/publicdomain/zero/1.0/") 
 # e.g. "http://creativecommons.org/publicdomain/zero/1.0/"
 ```
 
 ### rightsHolder
 
 ```{r}
-occurrence %<>% mutate(rightsHolder = str_c(str_to_title(Extracted) , " INBO ")) # e.g. "INBO"
+occurrence %<>% mutate(dwc_rightsHolder = str_c(str_to_title(Extracted) , " INBO ")) # e.g. "INBO"
 ```
 ### accessRights
 
 ```{r}
-occurrence %<>% mutate(accessRights = "http://www.inbo.be/en/norms-for-data-use") 
+occurrence %<>% mutate(dwc_accessRights = "http://www.inbo.be/en/norms-for-data-use") 
 ```
 
 ### datasetID
@@ -245,13 +245,13 @@ occurrence %<>% mutate(accessRights = "http://www.inbo.be/en/norms-for-data-use"
 ### institutionCode
 
 ```{r}
-occurrence %<>% mutate(institutionCode = "INBO") # e.g. "INBO"
+occurrence %<>% mutate(dwc_institutionCode = "INBO") # e.g. "INBO"
 ```
 
 ### datasetName
 
 ```{r}
-occurrence %<>% mutate(datasetName = "VBP - Occurrences of Bees, wasps, and ants (Apidae, Vespidae, Sphecidae and Formicidae in  Flanders, Belgium") # e.g. "Checklist of non-native freshwater fishes in Flanders, Belgium"
+occurrence %<>% mutate(dwc_datasetName = "VBP - Citizen science Occurrences of Bees, wasps, and ants (Apidae, Vespidae, Sphecidae and Formicidae in  Flanders, Belgium") # e.g. "Checklist of non-native freshwater fishes in Flanders, Belgium"
 ```
 
 The following terms contain information about the taxon:
@@ -259,7 +259,7 @@ The following terms contain information about the taxon:
 ### basisOfRecord
 
 ```{r}
-occurrence %<>% mutate(basisOfRecord = "HumanObservation")
+occurrence %<>% mutate(dwc_basisOfRecord = "HumanObservation")
 ```
 
 ### informationWithHeld
@@ -269,34 +269,32 @@ occurrence %<>% mutate(basisOfRecord = "HumanObservation")
 ### occurrenceID
 
 ```{r}
-occurrence %<>% mutate(occurrenceID = str_c("VBP:OCC:WNMN", id , ":", link))
+occurrence %<>% mutate(dwc_occurrenceID = str_c("VBP:OCC:WNMN", id , ":", link))
   
 ```
 
 ### recordedBy
 
 ```{r}
-occurrence %<>% mutate(recordedBy = 'Province of West Flanders')
+occurrence %<>% mutate(dwc_recordedBy = Extracted)
 ```
 
 ### individualCount
 
 ```{r}
-occurrence %<>%  rename(individualCount= 'action_amount') 
+occurrence %<>%  mutate(dwc_individualCount = number) 
                 
 ```
 
 ```{r}
-
-
-#occurrence$individualCount %<>% replace_na(0)
+occurrence$individualCount %<>% replace_na(0)
 ```
 
 ### organismQuantity
 
 
 ```{r}
-occurrence %<>%  mutate(organismQuantity= individualCount) 
+occurrence %<>%  mutate(dwc_organismQuantity = number) 
                 
 ```
 
@@ -305,12 +303,21 @@ occurrence %<>%  mutate(organismQuantity= individualCount)
 ### organismQuentityType
 
 ```{r}
-occurrence %<>%  mutate(organismQuantityType= action_en) 
+occurrence %<>%  mutate(dwc_organismQuantityType = 'individuals') 
                 
 ```
 
 
 ### sex
+
+```{r}
+occurrence %<>% mutate(dwc_sex = case_when(occurrence$sex == 'u' ~'unknown'
+                                       ,occurrence$sex == 'F' ~'female'
+                                       ,occurrence$sex == 'M' ~'male',
+                                       TRUE ~ sex))
+```
+
+
 
 ### lifeStage
 
@@ -319,46 +326,24 @@ occurrence %<>%  mutate(organismQuantityType= action_en)
 ### occurrenceRemarks
 
 ```{r}
-occurrence %<>% rename(occurrenceRemarks = 'action_en')
+occurrence %<>% rename(dwc_occurrenceRemarks = notes)
 ```
 
 ## samplingProtocol
 
 ```{r}
-occurrence %<>% mutate(samplingEffort = materials_en)
+occurrence %<>% mutate(dwc_samplingEffort = 'casual observation')
 ```
 
 ```{r}
-occurrence %<>% rename(samplingProtocol = 'materials_en') %>%
+occurrence %<>% rename(dwc_samplingProtocol = `counting method`)
  
 
-# extract follow ups to new column
-mutate(follow_up = str_extract(samplingProtocol, "Follow-up=[0-9]*")) %>%
-# remove follow ups from samplingProtocol
-mutate(samplingProtocol = str_remove(samplingProtocol, "Follow-up=[0-9]*")) %>%
-# remove leading ", " if present
-mutate(samplingProtocol = str_remove(samplingProtocol, "^,\\s")) %>%
-# remove trailing ", " if present
-mutate(samplingProtocol = str_remove(samplingProtocol, ",\\s$")) %>%
-# replace ", , " in ","
-mutate(samplingProtocol = str_replace(samplingProtocol,", , ", ", ")) %>%  
-# rename follow up
-rename(samplingEffort2 = "follow_up") %>% 
-# replace follow-up with times visited
-mutate(samplingProtocol = str_remove_all(samplingProtocol, "=[0-9]*"))
+
 ```
 
 ### samplingEffort
 
-```{r}
-head(occurrence, n = 5)
-
-occurrence %<>%
-  # extract follow ups to new column
-  mutate(samplingEffort = str_replace(samplingEffort, "Follow-up=*", "Times-visited=")) %>%
-  mutate(samplingEffort = str_replace_all(samplingEffort, "=",":")) %>%
-  mutate(samplingEffort = str_replace_all(samplingEffort, ","," |"))
-```
 
 ### eventDate
 
@@ -369,39 +354,37 @@ eventDate already ok in source file (should be)
 
 #occurrence %<>% ymd(date)
 
-occurrence %<>% mutate(eventDate = date)
-# mutate(eventDate = as_date(ymd(date))) # , format = "%Y-%m-%d")) 
+occurrence %<>% mutate(dwc_eventDate = date)
+  
 
-head(occurrence, n = 5)
+
 ```
 
 # Location
 
 ```{r}
 occurrence %<>%
-  rename(decimalLongitude = X) %>%
-  rename(decimalLatitude = Y) %>%
-  mutate(geodeticDatum = "WGS84") %>%
-  mutate(coordinateUncertaintyInMeters = "30") %>%
-  mutate(verbatimCoordinateSystem = "Lambert coordinates") %>%
-  mutate(verbatimSRS = "Belgian Datum 1972") %>%
-  mutate(countryCode = "BE")  %>%            
-  mutate(continent = "Europe")
+  mutate(dwc_decimalLongitude = lng) %>%
+  mutate(dwc_decimalLatitude = lat) %>%
+  mutate(dwc_geodeticDatum = "WGS84") %>%
+  mutate(dwc_coordinateUncertaintyInMeters = "30") %>%
+  mutate(dwc_stateProvince = `country division`) %>%
+  mutate(dwc_countryCode = "BE")  %>%            
+  mutate(dwc_continent = "Europe")
 ```
 
 ```{r}
-head(occurrence, n = 5)
+
 occurrence %<>%
-  mutate(verbatimLongitude = round(verbatimLongitude)) %>%
-  mutate(verbatimLatitude = round(verbatimLatitude)) %>%
-  mutate(decimalLongitude = round(decimalLongitude, digits = 5)) %>%
-  mutate(decimalLatitude = round(decimalLatitude, digits = 5))
+  
+  mutate(dwc_decimalLongitude = round(dwc_decimalLongitude, digits = 5)) %>%
+  mutate(dwc_decimalLatitude = round(dwc_decimalLatitude, digits = 5))
 ```
 
 ```{r}
 occurrence %<>%   
-   mutate(decimalLatitude = as.character(format(decimalLatitude, nsmall = 5))) %>%
-   mutate(decimalLongitude = as.character(format(decimalLongitude, nsmall = 5)))
+   mutate(dwc_decimalLatitude = as.character(format(dwc_decimalLatitude, nsmall = 5))) %>%
+   mutate(dwc_decimalLongitude = as.character(format(dwc_decimalLongitude, nsmall = 5)))
 ```
 
 ### continent
@@ -422,7 +405,7 @@ municipality already in source file
 
 ```{r}
 occurrence %<>%
-  mutate(municipality = str_remove(municipality,"\\(BE\\)"))
+  mutate(dwc_municipality = location)
 ```
 
 ### verbatimcoordinates
@@ -456,16 +439,13 @@ occurrence %<>%
 ### identifiedBy
 
 ```{r}
-occurrence %<>% mutate(identifiedBy = 'Province of West Flanders')
+occurrence %<>% mutate(dwc_identifiedBy = Extracted)
 ```
 
 ### scientificName 
 
 ```{r}
-occurrence %<>% mutate(scientificName = case_when(kind_nl == 'Muskusrat' ~ "Ondatra zibethicus",
-                                   kind_nl == 'Bruine rat' ~ "Rattus norvegicus"
-                                       )
-                                )
+occurrence %<>% mutate(dwc_scientificName = `scientific name`)
 ```
 
 ### kingdom
@@ -477,10 +457,6 @@ occurrence %<>% mutate(kingdom = "Animalia")
 ### scientificNameAuthorship
 
 ```{r}
-occurrence %<>% mutate(scientificNameAuthorship = case_when(kind_nl == 'Muskusrat' ~ "Linnaeus, 1766",
-                                   kind_nl == 'Bruine rat' ~ "Berkenhout, 1759"
-                                       )
-                                )
 
 
 ```
@@ -502,46 +478,28 @@ occurrence %<>% mutate(nomenclaturalCode = "ICZN") # e.g. "ICZN"
 ```{r}
 occurrence %<>% 
     ##select(individualCount) %>%
-    mutate(occurrenceStatus = case_when(action_nl == 'Vastgesteld' & individualCount > 0 ~ "Present",
-                                        action_nl == 'Vastgesteld' & individualCount == 0 ~ "Absent",
-                                        action_nl == 'Gevangen' & individualCount > 0 ~ "Present",
-                                        action_nl == 'Gevangen' & individualCount == 0 ~ "Absent",
-                                        action_nl == 'Verwijderd' & individualCount > 0 ~ "Present",
-                                        action_nl == 'Verwijderd' & individualCount == 0 ~ "Absent",
-                                        action_nl == 'Geen vangst' & individualCount > 0 ~ "Present",
-                                        action_nl == 'Geen vangst' & individualCount == 0 ~ "Absent",
-                                        action_nl == 'Sporen' & individualCount > 0 ~ "Present",
-                                        action_nl == 'Sporen' & individualCount == 0 ~ "Absent",
-                                        action_nl == 'Hoeveelheid'& individualCount > 0 ~ "Present",
-                                        action_nl == 'Hoeveelheid'& individualCount == 0 ~ "Absent",
-                                        individualCount > 0 ~ "Present",
-                                        individualCount == 0 ~ "Absent",
-                                        is.na(action_nl) | is.na(individualCount) ~ "Absent"
+    mutate(occurrenceStatus = case_when(dwc_individualCount > 0 ~ "Present",
+                                        dwc_individualCount == 0 ~ "Absent",
+                                        is.na(dwc_individualCount) ~ "Absent"
                                                   
                                        ))
 head(occurrence, n = 5)
 ```
-
-```{r eval=FALSE, include=FALSE}
-
-occurrence %<>%
-        filter(eventDate > '2018-01-12' & occurrenceStatus == "Present" & scientificName == "Ondatra zibethicus") 
-        
-head (occurrence, n = 5 )
-
-```
-
-
-
 
 
 
 ## Post-processing
 
 ```{r}
+
+occurrence %<>% select(starts_with("dwc_"))
+```
+
+
+
+```{r}
 colnames(occurrence) <- str_remove(colnames(occurrence), "dwc_")
-##occurrence %<>% select(-c(disposition, etiket_ref, collection, scientificName)) %<>% #remove collection columns
-          ##  rename(scientificName = verbatimScientificName) 
+
 ```
 
 ```{r}
@@ -572,7 +530,7 @@ occurrence %>% head()
 Save to CSV:
 
 ```{r}
-write_csv(occurrence, here::here("datasets", "mica-westvlaanderen-occurrences", "data", "processed", "occurrence.csv"), na = "")
+write_csv(occurrence, here::here("datasets", "np-profile-download", "data", "processed", "occurrence.csv"), na = "")
 ```
 
 
