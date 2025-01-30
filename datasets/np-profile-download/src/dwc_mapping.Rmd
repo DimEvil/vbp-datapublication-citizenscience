@@ -170,7 +170,7 @@ occurrence <- input_interim
 ```{r}
 occurrence %<>% select(-c(modified))
 ```
-## filter for muskrat & bruine rat
+## filter for species group
 
 Define which group of species to map to DwC
 
@@ -228,7 +228,7 @@ occurrence %<>% mutate(license = "http://creativecommons.org/publicdomain/zero/1
 ### rightsHolder
 
 ```{r}
-occurrence %<>% mutate(rightsHolder = "Research Institute for Nature and Forest") # e.g. "INBO"
+occurrence %<>% mutate(rightsHolder = str_c(str_to_title(Extracted) , " INBO ")) # e.g. "INBO"
 ```
 ### accessRights
 
