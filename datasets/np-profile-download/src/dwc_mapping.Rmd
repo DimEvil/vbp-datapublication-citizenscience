@@ -47,7 +47,7 @@ Obsolete columns removed
 some columns renamed to DwC term
 File exported to csv
 
-
+#load and list files
 
 
 ```{r}
@@ -55,30 +55,28 @@ csv_files <- list.files(here::here("datasets", "np-profile-download", "data", "r
 
 ```
 
-```{r eval=FALSE, include=FALSE}
-read_and_add_filename <- function(file) {
-  observerN <- read_csv(file)
-  observerN$filename <- basename(file)  # Volledige bestandsnaam toevoegen als kolom
-  observerN
-}
-```
 
-# Data inlezen en samenvoegen
-```{r eval=FALSE, include=FALSE}
-data <- map_dfr(csv_files, read_and_add_filename)
+# read all csv files
 
-```
-
-
-
-# Lijst van CSV-bestanden ophalen
 ```{r eval=FALSE, include=FALSE}
 csv_files <- list.files(here("datasets", "np-profile-download", "data", "raw"), 
                         pattern = "\\.csv$", full.names = TRUE)
 ```
 
 
-# Functie om een bestand in te lezen en het relevante deel van de bestandsnaam toe te voegen
+#read and add filename (old-no run)
+
+```{r eval=FALSE, include=FALSE}
+read_and_add_filename <- function(file) {
+  observerN <- read_csv(file)
+  observerN$filename <- basename(file)  # Add filename as column in dataframe
+  observerN
+}
+```
+
+
+
+# Function to read the file and add the relevant part of the filename (using ReGex)
 ```{r}
 read_and_add_filename <- function(file) {
   df <- read_csv(file)
@@ -86,7 +84,8 @@ read_and_add_filename <- function(file) {
   filename <- basename(file)
   
   # Deel na 'observations-' tot aan het volgende '-'
-  extracted_part <- str_extract(filename, "(?<=observations-)[^\\-]+-[^\\-]+")
+  extracted_part <- str_extract(filename, "(?<=observations-)([^\\-]+)-[^\\-]+") %>% 
+  gsub("-", " ", .)
   
   # Toevoegen aan dataframe
   df$Extracted <- extracted_part
@@ -106,6 +105,9 @@ data <- map_dfr(csv_files, read_and_add_filename)
 
 # Resultaat bekijken
 
+```{r}
+head(data)
+```
 
 
 
