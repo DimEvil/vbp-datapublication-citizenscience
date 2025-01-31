@@ -424,7 +424,7 @@ municipality already in source file
 
 ```{r}
 occurrence %<>%
-  mutate(dwc_municipality = location)
+  mutate(dwc_locality = location)
 ```
 
 ### verbatimcoordinates
