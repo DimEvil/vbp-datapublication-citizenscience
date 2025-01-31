@@ -485,6 +485,14 @@ occurrence %<>% mutate(dwc_identificationRemarks = `validator name`)
 occurrence %<>% mutate(dwc_scientificName = `scientific name`)
 ```
 
+
+### vernacularName 
+
+```{r}
+occurrence %<>% mutate(dwc_vernacularName = `species name`)
+```
+
+
 ### kingdom
 
 ```{r}
