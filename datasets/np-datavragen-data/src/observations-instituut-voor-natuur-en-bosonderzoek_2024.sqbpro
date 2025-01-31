@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="C:/Users/dimitri_brosens/Documents/Github/vbp-datapublication-citizenscience/datasets/np-datavragen-data/data/raw/Dimi/observations-instituut-voor-natuur-en-bosonderzoek_2024.sqlite" readonly="0" foreign_keys="1" case_sensitive_like="0" temp_store="0" wal_autocheckpoint="1000" synchronous="2"/><attached/><window><main_tabs open="structure browser pragmas query" current="3"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="125"/><column_width id="3" width="6819"/><column_width id="4" width="0"/><expanded_item id="0" parent="1"/><expanded_item id="1" parent="1"/><expanded_item id="2" parent="1"/><expanded_item id="3" parent="1"/></tab_structure><tab_browse><current_table name="4,8:mainactivity"/><default_encoding codec=""/><browse_table_settings><table schema="main" name="activity" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="52"/><column index="2" value="233"/><column index="3" value="61"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table></browse_table_settings></tab_browse><tab_sql><sql name="SQL 1">SELECT o.id
+	, o.date as eventDate
+	, o.time
+	, s.name as vernacularName
+	, s.scientific_name
+	, st.name as species_type
+	, sg.name as species_group
+	, o.number
+	, o.sex
+	, ls.name as life_stage
+	, a.name as activity
+	, om.name as method
+	, l.name as location
+	--, o.point
+	--, rtrim(rtrim(rtrim(rtrim(substr(o.point, INSTR(o.point, '[') + 2, 38), '}')), ']'))
+	, substr(rtrim(rtrim(rtrim(rtrim(substr(o.point, INSTR(o.point, '[') + 2, 38), '}')), ']')), instr(rtrim(rtrim(rtrim(rtrim(substr(o.point, INSTR(o.point, '[') + 2, 38), '}')), ']')), ',' )+2, 50) AS Lat
+	, substr( rtrim(rtrim(rtrim(rtrim(substr(o.point, INSTR(o.point, '[') + 2, 38), '}')), ']')), 0, length(rtrim(rtrim(rtrim(rtrim(substr(o.point, INSTR(o.point, '[') + 2, 38), '}')), ']'))) - (length(substr(rtrim(rtrim(rtrim(rtrim(substr(o.point, INSTR(o.point, '[') + 2, 38), '}')), ']')), instr(rtrim(rtrim(rtrim(rtrim(substr(o.point, INSTR(o.point, '[') + 2, 38), '}')), ']')), ',' )+3, 50))+2)) AS Lng
+	, o.notes
+	, vs.name as validation_status
+	, o.is_certain
+	, o.is_escape
+	, o.embargo_date
+	, o.external_reference
+	, 'https://waarnemingen.be/observation/' || o.id || '/' as link
+	, u.name as user_name
+FROM observation o
+INNER JOIN user u ON u.id = o.user
+INNER JOIN species s ON s.id = o.species
+LEFT JOIN species_group sg ON sg.id = s.&quot;group&quot;
+LEFT JOIN species_type st ON st.id = s.type
+LEFT JOIN life_stage ls ON ls.id = o.life_stage
+LEFT JOIN activity a ON a.id = o.activity
+LEFT JOIN observation_method om ON om.id = o.method
+LEFT JOIN location l ON l.id = o.location
+LEFT JOIN validation_status vs ON vs.id = o.validation_status
+--WHERE u.name in ('Steven De Saeger','Robin Guelinckx','Remar Erens','Dirk Hennebel','Adinda De Bruyn','Indra Jacobs','M. Kumpen','Frank Van Oost','Dhaluin, Pieter')
+--and sg.name in ('Planten', 'Mossen en korstmossen')
+-- 
+-- 
+-- 
+
+</sql><current_tab id="0"/></tab_sql></sqlb_project>
