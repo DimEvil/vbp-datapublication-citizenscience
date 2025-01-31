@@ -228,13 +228,19 @@ occurrence %<>% mutate(dwc_license = "http://creativecommons.org/publicdomain/ze
 ### rightsHolder
 
 ```{r}
-occurrence %<>% mutate(dwc_rightsHolder = str_c(str_to_title(Extracted) , " INBO ")) # e.g. "INBO"
+occurrence %<>% mutate(dwc_rightsHolder = str_c(str_to_title(Extracted) )) # e.g. "INBO"
 ```
 ### accessRights
 
 ```{r}
 occurrence %<>% mutate(dwc_accessRights = "http://www.inbo.be/en/norms-for-data-use") 
 ```
+### accessRights
+
+```{r}
+occurrence %<>% mutate(dwc_references = link) 
+```
+
 
 ### datasetID
 
@@ -269,7 +275,7 @@ occurrence %<>% mutate(dwc_basisOfRecord = "HumanObservation")
 ### occurrenceID
 
 ```{r}
-occurrence %<>% mutate(dwc_occurrenceID = str_c("VBP:OCC:WNMN", id , ":", link))
+occurrence %<>% mutate(dwc_occurrenceID = str_c("VBP:OCC:", source, id , ":", link))
   
 ```
 
@@ -320,6 +326,12 @@ occurrence %<>% mutate(dwc_sex = case_when(occurrence$sex == 'u' ~'unknown'
 
 
 ### lifeStage
+
+```{r}
+occurrence %<>% mutate(dwc_lifestage = case_when(occurrence$`life stage` == 'onbekend' ~'unknown'
+                                                 , TRUE ~ `life stage`))
+```
+
 
 ### behavior
 
@@ -386,6 +398,13 @@ occurrence %<>%
    mutate(dwc_decimalLatitude = as.character(format(dwc_decimalLatitude, nsmall = 5))) %>%
    mutate(dwc_decimalLongitude = as.character(format(dwc_decimalLongitude, nsmall = 5)))
 ```
+### coordinateUncertaintyInMeters
+
+```{r}
+occurrence %<>%
+  mutate(dwc_coordinateUncertaintyInMeters = accuracy)
+```
+
 
 ### continent
 
@@ -442,6 +461,24 @@ occurrence %<>%
 occurrence %<>% mutate(dwc_identifiedBy = Extracted)
 ```
 
+
+### identificationVerificationStatus
+
+
+```{r}
+occurrence %<>% mutate(dwc_identificationVerificationStatus = case_when(occurrence$`validation status` == 'onbekend' ~'unknown'
+                                                                      ,occurrence$`validation status` == 'goedgekeurd (automatische validatie)' ~ 'approved (automatic validation)'
+                                                                      , TRUE ~ `validation status`  ))
+```
+### identificationRemarks
+
+
+```{r}
+occurrence %<>% mutate(dwc_identificationRemarks = `validator name`)
+```
+
+
+
 ### scientificName 
 
 ```{r}
@@ -451,7 +488,7 @@ occurrence %<>% mutate(dwc_scientificName = `scientific name`)
 ### kingdom
 
 ```{r}
-occurrence %<>% mutate(kingdom = "Animalia")
+occurrence %<>% mutate(dwc_kingdom = "Animalia")
 ```
 
 ### scientificNameAuthorship
@@ -464,8 +501,11 @@ occurrence %<>% mutate(kingdom = "Animalia")
 ### taxonRank
 
 ```{r}
-occurrence %<>% mutate(taxonRank = "species")
+occurrence %<>% mutate(dwc_taxonRank = case_when(occurrence$`species type` == 'Soort' ~'species'
+                                                 , TRUE ~ `species type` ))
 ```
+
+
 
 ### nomenclaturalCode
 
@@ -478,7 +518,7 @@ occurrence %<>% mutate(nomenclaturalCode = "ICZN") # e.g. "ICZN"
 ```{r}
 occurrence %<>% 
     ##select(individualCount) %>%
-    mutate(occurrenceStatus = case_when(dwc_individualCount > 0 ~ "Present",
+    mutate(dwc_occurrenceStatus = case_when(dwc_individualCount > 0 ~ "Present",
                                         dwc_individualCount == 0 ~ "Absent",
                                         is.na(dwc_individualCount) ~ "Absent"
                                                   
@@ -514,11 +554,10 @@ col_order <- c( "type","language","license","rightsHolder","accessRights","datas
                ,"individualCount","organismQuantity","organismQuantityType","occurrenceStatus","occurrenceRemarks"
                ,"samplingProtocol","samplingEffort"
                ,"eventDate","continent","countryCode","municipality"
-               ,"verbatimLatitude","verbatimLongitude","verbatimCoordinateSystem","verbatimSRS"
                ,"decimalLatitude","decimalLongitude","geodeticDatum","coordinateUncertaintyInMeters"
-               ,"identifiedBy","scientificName","kingdom","scientificNameAuthorship","taxonRank","nomenclaturalCode"
+               ,"identifiedBy","scientificName","kingdom","taxonRank"
                )
-occurrence <- occurrence[, col_order]
+occurrence <- occurrence[ col_order]
 ```
 
 Preview data:
