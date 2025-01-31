@@ -47,3 +47,6 @@ po/*~
 
 # RStudio Connect folder
 rsconnect/
+
+data_from_sqlite.sql
+observations-instituut-voor-natuur-en-bosonderzoek_2024.sqlite
