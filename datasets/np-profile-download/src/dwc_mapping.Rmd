@@ -174,7 +174,7 @@ occurrence %<>% select(-c(modified))
 
 Define which group of species to map to DwC
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 occurrence %<>%
         filter(`species group` == 'Bijen, wespen en mieren') 
         
@@ -561,7 +561,7 @@ col_order <- c( "type","language","license","rightsHolder","accessRights","datas
                ,"institutionCode","datasetName","basisOfRecord","occurrenceID","recordedBy"
                ,"individualCount","organismQuantity","organismQuantityType","occurrenceStatus","occurrenceRemarks"
                ,"samplingProtocol","samplingEffort"
-               ,"eventDate","continent","countryCode","municipality"
+               ,"eventDate","continent","countryCode"
                ,"decimalLatitude","decimalLongitude","geodeticDatum","coordinateUncertaintyInMeters"
                ,"identifiedBy","scientificName","kingdom","taxonRank"
                )
