@@ -30,12 +30,12 @@ library(readxl)         # To read Excel files
 library(digest)         # To generate hashes
 library(rgbif)          # To use GBIF services
 library(sp)             # coordinate transformation
-library(leaflet)        # coordinate transformation
-library(widgetframe)    # coordinate transformation
+#library(leaflet)        # coordinate transformation
+#library(widgetframe)    # coordinate transformation
 library(sf)             # coordinate transformation
 library(lubridate)      # for the date
 library(ggplot2)        # for map
-library(mapview)
+#library(mapview)
 ```
 
 # Read source data
