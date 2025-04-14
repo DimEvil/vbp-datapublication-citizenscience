@@ -1,6 +1,6 @@
 ---
 title: "Darwin Core Mapping"
-subtitle: "VBP-INBO-waarnemingen-occurrences_2024
+subtitle: "VBP-INBO-waarnemingen-occurrences_202_vogels
 author: "Dimitri Brosens"
 date: "`r Sys.Date()`"
 output:
@@ -517,7 +517,7 @@ occurrence %>% head()
 Save to CSV:
 
 ```{r}
-write_csv(occurrence, here::here("datasets", "np-datavragen-data", "data", "processed", "occurrence.csv"), na = "")
+write_csv(occurrence, here::here("datasets", "np-datavragen-data", "data", "processed", "occurrence_vogels.csv"), na = "")
 ```
 
 
