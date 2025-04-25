@@ -57,3 +57,5 @@ observations-wannes-bellens.zip
 occurrence.csv
 
 data
+*.csv
+*.sqlite
