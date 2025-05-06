@@ -53,17 +53,17 @@ File exported to csv
 
 # Verbind met SQLite
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 con <- dbConnect(SQLite(), (here::here("observations-instituut-voor-natuur-en-bosonderzoek_all.sqlite" )))
 ```
 
 # Bekijk alle tabellen én views
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 dbListTables(con)  # views staan hier ook tussen
 ```
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 input_interim <- dbReadTable(con, "INBO_WNMN_PLANTS")  # werkt ook voor views
 ```
 
@@ -107,6 +107,15 @@ input_interim %<>% remove_empty("rows")
 ```{r}
 input_interim %>% head(n = 5)
 ```
+
+# embargo date
+
+```{r}
+input_interim <- input_interim %>%
+  filter(is.na(embargo_date) | embargo_date < today())
+```
+
+
 
 # Georeference source data
 
@@ -329,7 +338,7 @@ occurrence %<>% mutate(dwc_basisOfRecord = "HumanObservation")
 ### occurrenceID
 
 ```{r}
-occurrence %<>% mutate(dwc_occurrenceID = str_c("VBP:OCC:WNMN:", occurrenceID))
+occurrence %<>% mutate(dwc_occurrenceID = str_c("INBO:OCC:WNMN:", occurrenceID))
   
 ```
 
@@ -534,6 +543,9 @@ occurrence %<>%
 
 ### identificationVerificationStatus
 
+```{r}
+occurrence %<>% mutate(dwc_identificationVerificationStatus = identificationVerificationStatus)
+```
 
 ```{r eval=FALSE, include=FALSE}
 occurrence %<>% mutate(dwc_identificationVerificationStatus = case_when(occurrence$`validation status` == 'onbekend' ~'unknown'
@@ -577,7 +589,7 @@ occurrence %<>% mutate(dwc_taxonRank = taxonRank )
 ### nomenclaturalCode
 
 ```{r}
-occurrence %<>% mutate(nomenclaturalCode = "ICZN") # e.g. "ICZN"
+occurrence %<>% mutate(nomenclaturalCode = "ICBN") # e.g. "ICZN"
 ```
 
 ### occurrenceStatus
