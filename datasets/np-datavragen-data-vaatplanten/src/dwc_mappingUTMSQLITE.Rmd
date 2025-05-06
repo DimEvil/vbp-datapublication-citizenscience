@@ -305,6 +305,7 @@ occurrence %<>% mutate(dwc_references = references)
 ```
 
 
+
 ### datasetID
 
 ```{r}
@@ -316,7 +317,11 @@ occurrence %<>% mutate(dwc_references = references)
 ```{r}
 occurrence %<>% mutate(dwc_institutionCode = "INBO") # e.g. "INBO"
 ```
+### institutionID
 
+```{r}
+occurrence %<>% mutate(dwc_institutionID = "https://ror.org/00j54wy13") # e.g. "INBO"
+```
 ### datasetName
 
 ```{r}
@@ -334,6 +339,12 @@ occurrence %<>% mutate(dwc_basisOfRecord = "HumanObservation")
 ### informationWithHeld
 
 ### dataGeneralizations
+
+```{r}
+occurrence %<>% mutate(dwc_dataGeneralisations = "coordinates generalized to 1km grid")
+```
+
+
 
 ### occurrenceID
 
