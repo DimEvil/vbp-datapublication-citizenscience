@@ -1,4 +1,4 @@
---CREATE VIEW  INBO_WNMN_PLANTS AS
+CREATE VIEW  INBO_WNMN_PLANTS_native AS
 
 SELECT 
 o.id  as occurrenceID
@@ -224,7 +224,7 @@ o.id  as occurrenceID
 	--, ROUND (substr( rtrim(rtrim(rtrim(rtrim(substr(o.point, INSTR(o.point, '[') + 2, 38), '}')), ']')), 0, length(rtrim(rtrim(rtrim(rtrim(substr(o.point, INSTR(o.point, '[') + 2, 38), '}')), ']'))) - (length(substr(rtrim(rtrim(rtrim(rtrim(substr(o.point, INSTR(o.point, '[') + 2, 38), '}')), ']')), instr(rtrim(rtrim(rtrim(rtrim(substr(o.point, INSTR(o.point, '[') + 2, 38), '}')), ']')), ',' )+3, 50))+2)), 5) AS decimalLongitude
 	, ROUND(lat,5) as decimalLatitude
 	, ROUND(lng,5) as decimalLongitude
-	, o.notes
+--	, o.notes
 	, vs.name as identificationVerificationStatus_nl
 	, CASE 
 	WHEN vs.name = 'goedgekeurd (automatische validatie)'  THEN 'automatic validation'
@@ -254,11 +254,12 @@ LEFT JOIN observation_type ot ON ot.id = o.type
 LEFT JOIN location l ON l.id = o.location
 LEFT JOIN validation_status vs ON vs.id = o.validation_status
 LEFT JOIN country_division cv ON cv.id = o.country_division
-LEFT JOIN alienplantsNP NP ON NP.scientificName = s.scientific_name
+LEFT JOIN alienplantsNP NP ON NP.species = s.scientific_name
 
 WHERE sg.name =  'Planten'
-
+--AND u.name = 'Heidi Demolder'
 AND NP.scientificName IS NULL
+--AND o.notes IS NOT NULL
 
 
 --WHERE scientificName = ''

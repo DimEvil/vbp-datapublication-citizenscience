@@ -38,6 +38,7 @@ library(ggplot2)        # for map
 library(mapview)        # to view map
 library(DBI)            # database stuff
 library(RSQLite)        # sqlite connection
+library(reader)
 ```
 
 # Read source data
@@ -64,7 +65,7 @@ dbListTables(con)  # views staan hier ook tussen
 ```
 
 ```{r eval=FALSE, include=FALSE}
-input_interim <- dbReadTable(con, "INBO_WNMN_PLANTS")  # werkt ook voor views
+input_interim <- dbReadTable(con, "INBO_WNMN_PLANTS_native")  # werkt ook voor views
 ```
 
 
@@ -258,7 +259,7 @@ Start with record-level terms which contain metadata about the dataset (which is
 ### datasetID
 
 ```{r}
-occurrence %<>% mutate(dwc_datasetID = "placeholder")
+occurrence %<>% mutate(dwc_datasetID = "https://doi.org/10.15468/h25ces")
 ```
 
 ### add row numbers to genrate occurrenceID unique
@@ -325,7 +326,7 @@ occurrence %<>% mutate(dwc_institutionID = "https://ror.org/00j54wy13") # e.g. "
 ### datasetName
 
 ```{r}
-occurrence %<>% mutate(dwc_datasetName = "VBP - INBO collaborator Occurrences of plants recorded in waarnemingen.be in Flanders, Belgium") # e.g. "Checklist of non-native freshwater fishes in Flanders, Belgium"
+occurrence %<>% mutate(dwc_datasetName = "INBO collaborator Occurrences of plants recorded in waarnemingen.be in Flanders, Belgium") # e.g. "Checklist of non-native freshwater fishes in Flanders, Belgium"
 ```
 
 The following terms contain information about the taxon:
@@ -341,7 +342,7 @@ occurrence %<>% mutate(dwc_basisOfRecord = "HumanObservation")
 ### dataGeneralizations
 
 ```{r}
-occurrence %<>% mutate(dwc_dataGeneralisations = "coordinates generalized to 1km grid")
+occurrence %<>% mutate(dwc_dataGeneralizations = "coordinates generalized to 1km grid")
 ```
 
 
@@ -426,7 +427,7 @@ occurrence %<>% mutate(dwc_lifestage = case_when(occurrence$`lifeStage` == 'onbe
 ### occurrenceRemarks
 
 ```{r}
-occurrence %<>% mutate(dwc_occurrenceRemarks = notes)
+occurrence %<>% mutate(dwc_collectionCode = 'INBO-WNMN')
 ```
 
 ## samplingProtocol
@@ -467,7 +468,7 @@ occurrence %<>%
   mutate(dwc_decimalLongitude = dwc_centroid_longitude) %>%
   mutate(dwc_decimalLatitude = dwc_centroid_latitude) %>%
   mutate(dwc_geodeticDatum = "WGS84") %>%
-  mutate(dwc_coordinateUncertaintyInMeters = "30") %>%
+  mutate(dwc_coordinateUncertaintyInMeters = "701") %>%
   mutate(dwc_stateProvince = stateProvince) %>%
   mutate(dwc_countryCode = "BE")  %>%            
   mutate(dwc_continent = "Europe")
@@ -713,6 +714,9 @@ occurrenceMapUTM$centroid_longitude <- as.numeric(occurrenceMapUTM$centroid_long
 
 ```{r}
 head(occurrenceMapUTM)
+```
+```{r}
+problems(input_interim)
 ```
 
 

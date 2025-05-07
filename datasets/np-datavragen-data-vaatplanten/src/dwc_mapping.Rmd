@@ -51,7 +51,7 @@ File exported to csv
 
 
 ```{r}
-input_interim <- read.csv(here::here("vbp-datapublication-citizenscience","datasets", "np-datavragen-data-planten", "data", "interim", "occurrence_planten_inbo_wnmn.csv" ))
+input_interim <- read.csv(here::here("datasets", "np-datavragen-data-vaatplanten", "data", "interim", "occurrence_planten_inbo_wnmn.csv" ))
 ```
 
 
