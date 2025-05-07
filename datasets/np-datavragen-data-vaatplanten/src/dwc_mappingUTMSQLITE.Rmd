@@ -522,6 +522,7 @@ occurrence %<>%
 
 ### verbatimcoordinates
 
+
 ### verbatimLatitude
 
 ### verbatimLongitude
@@ -529,7 +530,7 @@ occurrence %<>%
 ### verbatimcoordinatesystem
 
 ```{r}
-#occurrence %<>% mutate(verbatimcoordinatesystem = "Lambert coordinates") # 
+occurrence %<>% mutate(verbatimcoordinatesystem = "UTM 1km") # 
 ```
 
 ### verbatimSRS
@@ -651,6 +652,8 @@ occurrence <- occurrence[ col_order]
 ```
 
 Preview data:
+
+
 
 ```{r}
 occurrence %>% head()
