@@ -1,4 +1,4 @@
---CREATE VIEW  INBO_WNMN_chordata_native AS
+CREATE VIEW  INBO_WNMN_chordata_native AS
 
 SELECT 
 o.id  as occurrenceID
