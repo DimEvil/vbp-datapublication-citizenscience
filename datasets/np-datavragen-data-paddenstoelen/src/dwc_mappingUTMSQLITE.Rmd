@@ -1,6 +1,6 @@
 ---
 title: "Darwin Core Mapping UTM SQLite connection"
-subtitle: "VBP-INBO-waarnemingen-occurrences_202_planten
+subtitle: "VBP-INBO-waarnemingen-occurrences_202_paddestoelen
 author: "Dimitri Brosens"
 date: "`r Sys.Date()`"
 output:
@@ -65,7 +65,7 @@ dbListTables(con)  # views staan hier ook tussen
 ```
 
 ```{r eval=FALSE, include=FALSE}
-input_interim <- dbReadTable(con, "INBO_WNMN_PLANTS_native")  # werkt ook voor views
+input_interim <- dbReadTable(con, "INBO_WNMN_paddestoelen_native")  # werkt ook voor views
 ```
 
 
@@ -259,7 +259,7 @@ Start with record-level terms which contain metadata about the dataset (which is
 ### datasetID
 
 ```{r}
-occurrence %<>% mutate(dwc_datasetID = "https://doi.org/10.15468/h25ces")
+occurrence %<>% mutate(dwc_datasetID = "https://doi.org/10.15468/****")
 ```
 
 ### add row numbers to genrate occurrenceID unique
@@ -326,7 +326,7 @@ occurrence %<>% mutate(dwc_institutionID = "https://ror.org/00j54wy13") # e.g. "
 ### datasetName
 
 ```{r}
-occurrence %<>% mutate(dwc_datasetName = "INBO collaborator Occurrences of plants recorded in waarnemingen.be in Flanders, Belgium") # e.g. "Checklist of non-native freshwater fishes in Flanders, Belgium"
+occurrence %<>% mutate(dwc_datasetName = "INBO collaborator Occurrences of fungi recorded in waarnemingen.be in Flanders, Belgium") # e.g. "Checklist of non-native freshwater fishes in Flanders, Belgium"
 ```
 
 The following terms contain information about the taxon:
@@ -587,7 +587,7 @@ occurrence %<>% mutate(dwc_vernacularName = vernacularName)
 ### kingdom
 
 ```{r}
-occurrence %<>% mutate(dwc_kingdom = "Plantae")
+occurrence %<>% mutate(dwc_kingdom = "Fungi")
 ```
 
 
@@ -663,15 +663,15 @@ occurrence %>% head()
 Save to CSV:
 
 ```{r}
-write_csv(occurrence, here::here("datasets", "np-datavragen-data-vaatplanten", "data", "processed", "occurrence_planten.csv"), na = "")
+write_csv(occurrence, here::here("datasets", "np-datavragen-data-paddenstoelen", "data", "processed", "occurrence_fungi.csv"), na = "")
 ```
 
 
 # Visualize data on a map OriginalCoördinates
 
 ```{r}
-occurrenceMap <- occurrence %>%
- filter(identifiedBy == "Jeroen Vanden Borre")
+occurrenceMap <- occurrence # %>%
+# filter(identifiedBy == "Jeroen Vanden Borre")
 ```
 
 ```{r}
