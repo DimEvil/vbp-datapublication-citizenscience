@@ -259,7 +259,7 @@ Start with record-level terms which contain metadata about the dataset (which is
 ### datasetID
 
 ```{r}
-occurrence %<>% mutate(dwc_datasetID = "https://doi.org/10.15468/****")
+occurrence %<>% mutate(dwc_datasetID = "https://doi.org/10.15468/kxsxk9")
 ```
 
 ### add row numbers to genrate occurrenceID unique
@@ -587,7 +587,7 @@ occurrence %<>% mutate(dwc_vernacularName = vernacularName)
 ### kingdom
 
 ```{r}
-occurrence %<>% mutate(dwc_kingdom = "Plantae")
+occurrence %<>% mutate(dwc_kingdom = "Animalia")
 ```
 
 
