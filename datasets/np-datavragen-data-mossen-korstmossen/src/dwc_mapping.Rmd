@@ -1,6 +1,6 @@
 ---
 title: "Darwin Core Mapping UTM SQLite connection"
-subtitle: "VBP-INBO-waarnemingen-occurrences_202_paddestoelen
+subtitle: "VBP-INBO-waarnemingen-occurrences_202_mossen_wieren_native
 author: "Dimitri Brosens"
 date: "`r Sys.Date()`"
 output:
@@ -259,7 +259,7 @@ Start with record-level terms which contain metadata about the dataset (which is
 ### datasetID
 
 ```{r}
-occurrence %<>% mutate(dwc_datasetID = "to be completed")
+occurrence %<>% mutate(dwc_datasetID = "https://doi.org/10.15468/ju9z3p")
 ```
 
 ### add row numbers to genrate occurrenceID unique
@@ -567,6 +567,12 @@ occurrence %<>% mutate(dwc_identificationVerificationStatus = case_when(occurren
 ```
 ### identificationRemarks
 
+
+## dynamicProperties
+
+```{r}
+occurrence %<>% mutate(dwc_dynamicProperties = '{"rbac":false,"rbac_allowed":"HIGHRES"}')
+```
 
 
 

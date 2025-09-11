@@ -1,6 +1,6 @@
 ---
 title: "Darwin Core Mapping UTM SQLite connection"
-subtitle: "VBP-INBO-waarnemingen-occurrences_202_gewervelden_hoge resolutie
+subtitle: "VBP-INBO-waarnemingen-occurrences_202_mossen_wieren_hoge resolutie
 author: "Dimitri Brosens"
 date: "`r Sys.Date()`"
 output:
@@ -65,7 +65,7 @@ dbListTables(con)  # views staan hier ook tussen
 ```
 
 ```{r eval=FALSE, include=FALSE}
-input_interim <- dbReadTable(con, "INBO_WNMN_chordata_native")  # werkt ook voor views
+input_interim <- dbReadTable(con, "INBO_WNMN_mossen_wieren_native")  # werkt ook voor views
 ```
 
 
@@ -160,7 +160,7 @@ Start with record-level terms which contain metadata about the dataset (which is
 ### datasetID
 
 ```{r}
-occurrence %<>% mutate(dwc_datasetID = "https://doi.org/10.15468/xa5sqf")
+occurrence %<>% mutate(dwc_datasetID = "https://doi.org/10.15468/ju9z3p")
 ```
 
 ### add row numbers to genrate occurrenceID unique
@@ -227,7 +227,7 @@ occurrence %<>% mutate(dwc_institutionID = "https://ror.org/00j54wy13") # e.g. "
 ### datasetName
 
 ```{r}
-occurrence %<>% mutate(dwc_datasetName = "INBO collaborator Occurrences -High resolution - of vertebrates recorded in waarnemingen.be in Flanders, Belgium") # e.g. "Checklist of non-native freshwater fishes in Flanders, Belgium"
+occurrence %<>% mutate(dwc_datasetName = "INBO collaborator Occurrences -High resolution - of Bryophyta, lichens, algae and protists recorded in waarnemingen.be in Flanders, Belgium") # e.g. "Checklist of non-native freshwater fishes in Flanders, Belgium"
 ```
 
 The following terms contain information about the taxon:
@@ -496,7 +496,7 @@ occurrence %<>% mutate(dwc_vernacularName = vernacularName)
 ### kingdom
 
 ```{r}
-occurrence %<>% mutate(dwc_kingdom = "Animalia")
+occurrence %<>% mutate(dwc_kingdom = "Plantae")
 ```
 
 
