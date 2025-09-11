@@ -568,6 +568,12 @@ occurrence %<>% mutate(dwc_identificationVerificationStatus = case_when(occurren
 ### identificationRemarks
 
 
+## dynamicProperties
+
+```{r}
+occurrence %<>% mutate(dwc_dynamicProperties = '{"rbac":false,"rbac_allowed":"HIGHRES"}')
+```
+
 
 
 ### scientificName 
