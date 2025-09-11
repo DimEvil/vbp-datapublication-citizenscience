@@ -572,7 +572,7 @@ occurrence %>% head()
 Save to CSV:
 
 ```{r}
-write_csv(occurrence, here::here("datasets", "np-datavragen-data-gewervelden", "data", "processed", "occurrence_chordata_high_res.csv"), na = "")
+write_csv(occurrence, here::here("datasets", "np-datavragen-data-mossen-korstmossen", "data", "processed", "occurrence_mosses_etc_high_res.csv"), na = "")
 ```
 
 
