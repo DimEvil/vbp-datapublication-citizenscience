@@ -477,9 +477,8 @@ occurrence %<>%
 ```{r}
 
 occurrence %<>%
-  
-  mutate(dwc_decimalLongitude = round(dwc_decimalLongitude, digits = 5)) %>%
-  mutate(dwc_decimalLatitude = round(dwc_decimalLatitude, digits = 5))
+    mutate(dwc_decimalLongitude = round(dwc_decimalLongitude, digits = 5)) %>%
+    mutate(dwc_decimalLatitude = round(dwc_decimalLatitude, digits = 5))
 ```
 
 ```{r}
@@ -567,6 +566,13 @@ occurrence %<>% mutate(dwc_identificationVerificationStatus = case_when(occurren
 ```
 ### identificationRemarks
 
+### dynamicProperties
+
+## dynamicProperties
+
+```{r}
+occurrence %<>% mutate(dwc_dynamicProperties = '{"rbac":"false","rbac_allowed":"HIGHRES"}')
+```
 
 
 
