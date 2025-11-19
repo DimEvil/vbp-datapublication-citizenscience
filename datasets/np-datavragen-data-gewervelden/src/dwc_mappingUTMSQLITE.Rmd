@@ -77,12 +77,6 @@ head(input_interim)
 
 
 
-```{r eval=FALSE, include=FALSE}
-input_interim <- read.csv(here::here("datasets", "np-datavragen-data-vaatplanten", "data", "interim", "occurrence_planten_inbo_wnmn.csv" ))
-```
-
-
-
 # Resultaat bekijken
 
 ```{r}
@@ -237,16 +231,6 @@ occurrence %<>% select(-c(is_escape, embargo_date))
 ## filter for species group
 
 Define which group of species to map to DwC
-
-```{r eval=FALSE, include=FALSE}
-occurrence %<>%
-        filter(`species_group` == 'Planten') 
-        
-head(occurrence, n = 5 )
-
-```
-
-
 
 # Term mapping
 
@@ -559,11 +543,6 @@ occurrence %<>% mutate(verbatimcoordinatesystem = "UTM 1km") #
 occurrence %<>% mutate(dwc_identificationVerificationStatus = identificationVerificationStatus)
 ```
 
-```{r eval=FALSE, include=FALSE}
-occurrence %<>% mutate(dwc_identificationVerificationStatus = case_when(occurrence$`validation status` == 'onbekend' ~'unknown'
-                                                                      ,occurrence$`validation status` == 'goedgekeurd (automatische validatie)' ~ 'approved (automatic validation)'
-                                                                      , TRUE ~ `validation status`  ))
-```
 ### identificationRemarks
 
 ### dynamicProperties
@@ -571,7 +550,7 @@ occurrence %<>% mutate(dwc_identificationVerificationStatus = case_when(occurren
 ## dynamicProperties
 
 ```{r}
-occurrence %<>% mutate(dwc_dynamicProperties = '{"rbac":"false","rbac_allowed":"HIGHRES"}')
+occurrence %<>% mutate(dwc_dynamicProperties = '{"rbac":false,"rbac_allowed":"HIGHRES"}')
 ```
 
 

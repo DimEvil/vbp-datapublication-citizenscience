@@ -571,7 +571,7 @@ occurrence %<>% mutate(dwc_identificationVerificationStatus = case_when(occurren
 ## dynamicProperties
 
 ```{r}
-occurrence %<>% mutate(dwc_dynamicProperties = '{"rbac":"false","rbac_allowed":"HIGHRES"}')
+occurrence %<>% mutate(dwc_dynamicProperties = '{"rbac":false,"rbac_allowed":"HIGHRES"}')
 ```
 
 
