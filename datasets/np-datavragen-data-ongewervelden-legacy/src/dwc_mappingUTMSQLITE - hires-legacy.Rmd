@@ -1,6 +1,6 @@
 ---
 title: "Darwin Core Mapping UTM SQLite connection"
-subtitle: "VBP-INBO-waarnemingen-occurrences_202_gewervelden_hoge resolutie_legacy
+subtitle: "VBP-INBO-waarnemingen-occurrences_202_ongewervelden_hoge resolutie_legacy
 author: "Dimitri Brosens"
 date: "`r Sys.Date()`"
 output:
