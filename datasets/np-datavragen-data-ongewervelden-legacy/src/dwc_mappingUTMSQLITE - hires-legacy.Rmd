@@ -65,7 +65,7 @@ dbListTables(con)  # views staan hier ook tussen
 ```
 
 ```{r eval=FALSE, include=FALSE}
-input_interim <- dbReadTable(con, "INBO_WNMN_chordata_legacy")  # werkt ook voor views
+input_interim <- dbReadTable(con, "INBO_WNMN_invertebrata_legacy")  # werkt ook voor views
 ```
 
 
