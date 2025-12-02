@@ -238,7 +238,7 @@ occurrence %<>% mutate(dwc_institutionID = "https://ror.org/00j54wy13") # e.g. "
 ### datasetName
 
 ```{r}
-occurrence %<>% mutate(dwc_datasetName = "INBO collaborator Occurrences -High resolution - of vertebrates recorded in waarnemingen.be in Flanders, Belgium") # e.g. "Checklist of non-native freshwater fishes in Flanders, Belgium"
+occurrence %<>% mutate(dwc_datasetName = "INBO collaborator Occurrences -High resolution - of invertebrates recorded in waarnemingen.be in Flanders, Belgium") # e.g. "Checklist of non-native freshwater fishes in Flanders, Belgium"
 ```
 
 The following terms contain information about the taxon:
@@ -572,6 +572,14 @@ col_order <- c( "type","language","license","rightsHolder","accessRights","datas
 occurrence <- occurrence[ col_order]
 ```
 
+##safety distinct
+
+```{r}
+occurrence <- occurrence %>% distinct()
+```
+
+
+
 Preview data:
 
 
@@ -583,7 +591,7 @@ occurrence %>% head()
 Save to CSV:
 
 ```{r}
-write_csv(occurrence, here::here("datasets", "np-datavragen-data-gewervelden-legacy", "data", "processed", "occurrence_invertebrates_high_res_legacy.csv"), na = "")
+write_csv(occurrence, here::here("datasets", "np-datavragen-data-ongewervelden-legacy", "data", "processed", "occurrence_invertebrates_high_res_legacy.csv"), na = "")
 ```
 
 
