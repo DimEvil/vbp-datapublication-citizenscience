@@ -572,6 +572,15 @@ col_order <- c( "type","language","license","rightsHolder","accessRights","datas
 occurrence <- occurrence[ col_order]
 ```
 
+
+DISTINCT NEEDED, don't know why
+```{r}
+occurrence <- occurrence %>% distinct()
+```
+
+
+
+
 Preview data:
 
 
@@ -583,7 +592,7 @@ occurrence %>% head()
 Save to CSV:
 
 ```{r}
-write_csv(occurrence, here::here("datasets", "np-datavragen-data-gewervelden-legacy", "data", "processed", "occurrence_invertebrates_high_res_legacy.csv"), na = "")
+write_csv(occurrence, here::here("datasets", "np-datavragen-data-gewervelden-legacy", "data", "processed", "occurrence_vertebrates_high_res_legacy.csv"), na = "")
 ```
 
 
