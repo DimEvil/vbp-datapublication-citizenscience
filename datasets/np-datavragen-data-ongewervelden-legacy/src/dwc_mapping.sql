@@ -1,8 +1,12 @@
-SELECT o.id  as occurrenceID
+--CREATE VIEW INBO_WNMN_invertebrata_legacy AS
+
+SELECT 
+o.id  as occurrenceID
 	, o.date as eventDate
 	, o.time
 	, s.name as vernacularName
 	, s.scientific_name as scientificName
+	,NP.scientificName as scientificNameGBIF
 	, CASE 
         	WHEN st.name = 'Hybride' THEN 'hybrid'
 			WHEN st.name = 'Ondersoort' THEN 'subspecies'
@@ -11,7 +15,12 @@ SELECT o.id  as occurrenceID
 			WHEN st.name = 'Variëteit' THEN 'varietas'
 			WHEN st.name = 'Verzamelsoort' THEN 'informal group'
 			WHEN st.name = 'forma' THEN 'forma'
-					ELSE 'Check needed'
+			WHEN st.name = 'soort' THEN 'species'
+			WHEN st.name = 'verzamelsoort' THEN 'informal group'
+			WHEN st.name = 'ondersoort' THEN 'subspecies'
+			WHEN st.name = 'variëteit' THEN 'varietas'
+			WHEN st.name = 'hybride' THEN 'hybrid'
+					ELSE st.name
 					END as taxonRank
 	, sg.name as species_group
 	,CASE  
@@ -37,13 +46,42 @@ SELECT o.id  as occurrenceID
     WHEN sg.name = 'Weekdieren' THEN 'Animalia'
     WHEN sg.name = 'Zoogdieren' THEN 'Animalia'
     ELSE 'Unknown'
-END AS kingdom
-
-	, o.number as individualCount
-	, o.sex as sex
-	, ls.name as lifeStage
-	--, a.name as behaviour
-	/**Behaviour**/
+    END AS kingdom
+   , o.number as individualCount
+   , o.sex as sex
+ ,CASE 
+	 WHEN ls.name = 'onbekend' THEN 'unknown'
+	 WHEN ls.name = 'adult' THEN 'adult'
+	 WHEN ls.name = 'eerste winter' THEN 'first winter'
+	 WHEN ls.name = 'tweede kalenderjaar' THEN 'second year'
+	 WHEN ls.name = 'eerste kalenderjaar' THEN 'first year'
+	 WHEN ls.name = 'eerste najaar' THEN 'first autumn'
+	 WHEN ls.name = 'eerste jaar' THEN 'first year'
+	 WHEN ls.name = 'juveniel' THEN 'juvenile'
+	 WHEN ls.name = 'eerste jaar' THEN 'first year'
+	 WHEN ls.name = 'adult zomerkleed' THEN 'adult, summer plumage'
+	 WHEN ls.name = 'adult winterkleed' THEN 'adult, winter plumage'
+	 WHEN ls.name = 'winterkleed' THEN 'winter plumage'
+	 WHEN ls.name = 'subadult' THEN 'subadult'
+	 WHEN ls.name = 'onvolwassen' THEN 'subadult'
+	 WHEN ls.name = 'pullus' THEN 'pullus'
+	 WHEN ls.name = 'onbekend' THEN 'unknown'
+	 WHEN ls.name = 'afwijkend' THEN 'abnormal'
+     WHEN ls.name = 'bladontplooiing' THEN 'leaf unfolding'
+	 WHEN ls.name = 'bloeiend' THEN 'flowering'
+     WHEN ls.name = 'bovengronds afgestorven' THEN 'above-ground dead'
+     WHEN ls.name = 'gal' THEN 'gall'
+     WHEN ls.name = 'in knop' THEN 'in bud'
+     WHEN ls.name = 'lege vruchten' THEN 'empty fruits'
+     WHEN ls.name = 'rozet' THEN 'rosette'
+     WHEN ls.name = 'sporenvormend/fertiel' THEN 'spore-forming/fertile'
+     WHEN ls.name = 'unknown' THEN 'unknown'
+     WHEN ls.name = 'vegetatief' THEN 'vegetative'
+     WHEN ls.name = 'vruchtdragend' THEN 'fruiting'
+     WHEN ls.name = 'zaailing' THEN 'seedling'
+     ELSE ls.name
+	 END as lifeStage
+	, ls.name as lifeStage_nl
 	,CASE  
     WHEN a.name = '(kleur)ringdragend' THEN 'color-ringed'
     WHEN a.name = '(nabij) nest / burcht' THEN 'near nest / burrow'
@@ -125,7 +163,6 @@ END AS kingdom
     WHEN a.name = 'zwemmend' THEN 'swimming'
     ELSE a.name
 	END as behaviour
-	
 	,CASE  
     WHEN om.name = '(e)dna barcoding' THEN 'eDNA barcoding'
     WHEN om.name = 'Led emmer' THEN 'LED bucket'
@@ -185,15 +222,22 @@ END AS kingdom
     WHEN om.name = 'zichtwaarneming met zoeklicht' THEN 'visual observation with searchlight'
     WHEN om.name = 'zichtwaarneming zaklamp' THEN 'visual observation with flashlight'
     ELSE om.name 
-END AS samplingProtocol
+    END AS samplingProtocol
 	, om.name as method
 	, l.name as locality
-	--, o.point
-	--, rtrim(rtrim(rtrim(rtrim(substr(o.point, INSTR(o.point, '[') + 2, 38), '}')), ']'))
-	, ROUND (substr(rtrim(rtrim(rtrim(rtrim(substr(o.point, INSTR(o.point, '[') + 2, 38), '}')), ']')), instr(rtrim(rtrim(rtrim(rtrim(substr(o.point, INSTR(o.point, '[') + 2, 38), '}')), ']')), ',' )+2, 50), 5 ) AS decimalLatitude
-	, ROUND (substr( rtrim(rtrim(rtrim(rtrim(substr(o.point, INSTR(o.point, '[') + 2, 38), '}')), ']')), 0, length(rtrim(rtrim(rtrim(rtrim(substr(o.point, INSTR(o.point, '[') + 2, 38), '}')), ']'))) - (length(substr(rtrim(rtrim(rtrim(rtrim(substr(o.point, INSTR(o.point, '[') + 2, 38), '}')), ']')), instr(rtrim(rtrim(rtrim(rtrim(substr(o.point, INSTR(o.point, '[') + 2, 38), '}')), ']')), ',' )+3, 50))+2)), 5) AS decimalLongitude
-	, o.notes
-	, vs.name as identificationVerificationStatus
+	--, ROUND (substr(rtrim(rtrim(rtrim(rtrim(substr(o.point, INSTR(o.point, '[') + 2, 38), '}')), ']')), instr(rtrim(rtrim(rtrim(rtrim(substr(o.point, INSTR(o.point, '[') + 2, 38), '}')), ']')), ',' )+2, 50), 5 ) AS decimalLatitude
+	--, ROUND (substr( rtrim(rtrim(rtrim(rtrim(substr(o.point, INSTR(o.point, '[') + 2, 38), '}')), ']')), 0, length(rtrim(rtrim(rtrim(rtrim(substr(o.point, INSTR(o.point, '[') + 2, 38), '}')), ']'))) - (length(substr(rtrim(rtrim(rtrim(rtrim(substr(o.point, INSTR(o.point, '[') + 2, 38), '}')), ']')), instr(rtrim(rtrim(rtrim(rtrim(substr(o.point, INSTR(o.point, '[') + 2, 38), '}')), ']')), ',' )+3, 50))+2)), 5) AS decimalLongitude
+	, ROUND(lat,5) as decimalLatitude
+	, ROUND(lng,5) as decimalLongitude
+--	, o.notes
+	, vs.name as identificationVerificationStatus_nl
+	, CASE 
+	WHEN vs.name = 'goedgekeurd (automatische validatie)'  THEN 'automatic validation'
+	WHEN vs.name = 'onbekend' THEN 'validated'
+	WHEN vs.name = 'goedgekeurd (met bewijs)' THEN 'validated, with evidence'
+	WHEN vs.name = 'goedgekeurd (aannemelijk)' THEN 'validated, high probability'
+	ELSE vs.name
+	END as identificationVerificationStatus
 	, o.is_certain
 	, o.is_escape
 	, o.embargo_date
@@ -202,6 +246,7 @@ END AS samplingProtocol
 	, u.name as recordedBy
 	, u.name as indentifiedBy
 	, cv.name as stateProvince
+
 FROM observation o
 INNER JOIN user u ON u.id = o.user
 INNER JOIN species s ON s.id = o.species
@@ -214,12 +259,15 @@ LEFT JOIN observation_type ot ON ot.id = o.type
 LEFT JOIN location l ON l.id = o.location
 LEFT JOIN validation_status vs ON vs.id = o.validation_status
 LEFT JOIN country_division cv ON cv.id = o.country_division
---WHERE u.name in ('Steven De Saeger','Robin Guelinckx','Remar Erens','Dirk Hennebel','Adinda De Bruyn','Indra Jacobs','M. Kumpen','Frank Van Oost','Dhaluin, Pieter')
---and sg.name in ('Planten', 'Mossen en korstmossen')
---WHERE st.name = 'Synoniem'
---WHERE sg.name = 'Verstoringen'
---WHERE u.name = 'Roosmarijn Steeman'
-AND o.id is not '312316574'
--- 
--- 
+LEFT JOIN alienplantsNP NP ON NP.species = s.scientific_name
+LEFT JOIN alineanimalsNP_Stijn NPa ON NPa.species = s.scientific_name
 
+--AND u.name = 'Heidi Demolder'
+AND NP.scientificName IS NULL
+--AND o.notes IS NOT NULL
+
+WHERE sg.name IN  ('Dagvlinders','Libellen','Insecten (overig)','Mollusca (Weekdieren)','Nachtvlinders en micro''s','Geleedpotigen (overig)'
+                  ,'Sprinkhanen en krekels','Wantsen, cicaden en plantenluizen','Kevers','Bijen, wespen en mieren','Vliegen en muggen','Overige ongewervelden')
+AND o.date < '2019-01-01'
+
+--WHERE scientificName = ''
