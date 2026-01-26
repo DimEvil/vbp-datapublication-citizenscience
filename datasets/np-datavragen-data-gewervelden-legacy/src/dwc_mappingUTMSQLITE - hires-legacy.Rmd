@@ -238,7 +238,7 @@ occurrence %<>% mutate(dwc_institutionID = "https://ror.org/00j54wy13") # e.g. "
 ### datasetName
 
 ```{r}
-occurrence %<>% mutate(dwc_datasetName = "INBO collaborator Occurrences -High resolution - of vertebrates recorded in waarnemingen.be in Flanders, Belgium") # e.g. "Checklist of non-native freshwater fishes in Flanders, Belgium"
+occurrence %<>% mutate(dwc_datasetName = "INBO collaborator Occurrences -High resolution - of vertebrates recorded in waarnemingen.be in Flanders, Belgium, legacy dataset") # e.g. "Checklist of non-native freshwater fishes in Flanders, Belgium"
 ```
 
 The following terms contain information about the taxon:
