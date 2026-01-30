@@ -1,6 +1,6 @@
 ---
-title: "Darwin Core Mapping UTM SQLite connection"
-subtitle: "VBP-INBO-waarnemingen-occurrences_planten-legacy
+title: "Darwin Core Mapping"
+subtitle: "VBP-INBO-waarnemingen-occurrences_202_planten
 author: "Dimitri Brosens"
 date: "`r Sys.Date()`"
 output:
@@ -35,10 +35,7 @@ library(widgetframe)    # coordinate transformation
 library(sf)             # coordinate transformation
 library(lubridate)      # for the date
 library(ggplot2)        # for map
-library(mapview)        # to view map
-library(DBI)            # database stuff
-library(RSQLite)        # sqlite connection
-library(reader)
+library(mapview)
 ```
 
 # Read source data
@@ -52,21 +49,11 @@ File exported to csv
 
 #load and list files
 
-# Verbind met SQLite
 
-```{r eval=FALSE, include=FALSE}
-con <- dbConnect(SQLite(), (here::here("observation-2026-01-29-15-46-observations-instituut-voor-natuur-en-bosonderzoek.sqlite" )))
+```{r}
+input_interim <- read.csv(here::here("datasets", "np-datavragen-data-vaatplanten", "data", "interim", "occurrence_planten_inbo_wnmn.csv" ))
 ```
 
-# Bekijk alle tabellen én views
-
-```{r eval=FALSE, include=FALSE}
-dbListTables(con)  # views staan hier ook tussen
-```
-
-```{r eval=FALSE, include=FALSE}
-input_interim <- dbReadTable(con, "INBO_WNMN_PLANTS_legacy")  # werkt ook voor views
-```
 
 
 # Resultaat bekijken
@@ -74,6 +61,7 @@ input_interim <- dbReadTable(con, "INBO_WNMN_PLANTS_legacy")  # werkt ook voor v
 ```{r}
 head(input_interim)
 ```
+
 
 
 
@@ -94,24 +82,13 @@ input_interim %<>% remove_empty("rows")
 input_interim %>% head(n = 5)
 ```
 
-# embargo date
+# Georeference source data
 
-```{r}
-input_interim <- input_interim %>%
-  filter(is.na(embargo_date) | embargo_date < today())
-```
+## Lambert to Decimals
+
+### Keep original x,Y as verbatimcoordinates
 
 
-# remove spec.
-
-```{r}
-input_interim <- input_interim %>% 
-  mutate(
-    scientificName = scientificName %>% 
-      str_remove("\\s+spec\\.?$") %>%  # verwijdert ' spec.' of ' spec'
-      str_trim()
-  )
-```
 
 # Occurrence core
 
@@ -130,8 +107,7 @@ occurrence %<>% select(-c(is_escape, embargo_date))
 ```
 ## filter for species group
 
-Define which group of species to map to DwC (filtering was done in SQL)
-Not needed as filtering was done in SQLite for each group
+Define which group of species to map to DwC
 
 ```{r eval=FALSE, include=FALSE}
 occurrence %<>%
@@ -154,7 +130,7 @@ Start with record-level terms which contain metadata about the dataset (which is
 ### datasetID
 
 ```{r}
-occurrence %<>% mutate(dwc_datasetID = "no DOI")
+occurrence %<>% mutate(dwc_datasetID = "placeholder")
 ```
 
 ### add row numbers to genrate occurrenceID unique
@@ -180,7 +156,7 @@ occurrence %<>% mutate(dwc_language = "en") # e.g. "en"
 ### license
 
 ```{r}
-occurrence %<>% mutate(dwc_license = "By accessing this dataset, you agree to use it solely for internal analysis. You may not reproduce, distribute, or share the data.") 
+occurrence %<>% mutate(dwc_license = "http://creativecommons.org/publicdomain/zero/1.0/") 
 # e.g. "http://creativecommons.org/publicdomain/zero/1.0/"
 ```
 
@@ -192,27 +168,31 @@ occurrence %<>% mutate(dwc_rightsHolder = "INBO") # e.g. "INBO"
 ### accessRights
 
 ```{r}
-occurrence %<>% mutate(dwc_accessRights = "only for internal use") 
+occurrence %<>% mutate(dwc_accessRights = "http://www.inbo.be/en/norms-for-data-use") 
 ```
 ### accessRights
 
 ```{r}
 occurrence %<>% mutate(dwc_references = references) 
 ```
+
+
+### datasetID
+
+```{r}
+#occurrence %<>% mutate(datasetID = "insert doi") 
+```
+
 ### institutionCode
 
 ```{r}
 occurrence %<>% mutate(dwc_institutionCode = "INBO") # e.g. "INBO"
 ```
-### institutionID
 
-```{r}
-occurrence %<>% mutate(dwc_institutionID = "https://ror.org/00j54wy13") # e.g. "INBO"
-```
 ### datasetName
 
 ```{r}
-occurrence %<>% mutate(dwc_datasetName = "INBO collaborator Occurrences of plants recorded in waarnemingen.be in Flanders, Belgium (Hoge resolutie, legacy)") # e.g. "Checklist of non-native freshwater fishes in Flanders, Belgium"
+occurrence %<>% mutate(dwc_datasetName = "VBP - INBO collaborator Occurrences of plants recorded in waarnemingen.be in Flanders, Belgium") # e.g. "Checklist of non-native freshwater fishes in Flanders, Belgium"
 ```
 
 The following terms contain information about the taxon:
@@ -227,16 +207,10 @@ occurrence %<>% mutate(dwc_basisOfRecord = "HumanObservation")
 
 ### dataGeneralizations
 
-```{r}
-occurrence %<>% mutate(dwc_dataGeneralizations = "coordinates are not generalized")
-```
-
-
-
 ### occurrenceID
 
 ```{r}
-occurrence %<>% mutate(dwc_occurrenceID = str_c("INBO:OCC:WNMN:SEN:", occurrenceID))
+occurrence %<>% mutate(dwc_occurrenceID = str_c("VBP:OCC:WNMN:", occurrenceID))
   
 ```
 
@@ -310,14 +284,10 @@ occurrence %<>% mutate(dwc_lifestage = case_when(occurrence$`lifeStage` == 'onbe
 
 ### behavior
 
-```{r}
-occurrence %<>% mutate(dwc_behavior = behaviour)
-```
-
 ### occurrenceRemarks
 
 ```{r}
-occurrence %<>% mutate(dwc_collectionCode = 'INBO-WNMN:SEN')
+occurrence %<>% mutate(dwc_occurrenceRemarks = notes)
 ```
 
 ## samplingProtocol
@@ -360,12 +330,9 @@ occurrence %<>%
   mutate(dwc_geodeticDatum = "WGS84") %>%
   mutate(dwc_coordinateUncertaintyInMeters = "30") %>%
   mutate(dwc_stateProvince = stateProvince) %>%
-  mutate(dwc_countryCode = "BE")  %>%  
-  mutate(verbatimcoordinatesystem = "WGS84") %>%
+  mutate(dwc_countryCode = "BE")  %>%            
   mutate(dwc_continent = "Europe")
 ```
-### verbatimcoordinatesystem
-
 
 ```{r}
 
@@ -387,6 +354,19 @@ occurrence %<>%
   mutate(dwc_coordinateUncertaintyInMeters = '30')
 ```
 
+
+### continent
+
+```{r}
+##occurrence %<>% mutate(continent = "Europe") # e.g. "Belgium = BE"
+```
+
+### countryCode
+
+```{r}
+#occurrence %<>% mutate(countryCode = "BE") # e.g. "Belgium = BE"
+```
+
 ### municipality
 
 municipality already in source file
@@ -401,19 +381,46 @@ occurrence %<>%
   mutate(dwc_locality = locality)
 ```
 
+### verbatimcoordinates
+
+### verbatimLatitude
+
+### verbatimLongitude
+
+### verbatimcoordinatesystem
+
+```{r}
+#occurrence %<>% mutate(verbatimcoordinatesystem = "Lambert coordinates") # 
+```
+
+### verbatimSRS
+
+```{r}
+#occurrence %<>% mutate(verbatimSRS = "Belgian Datum 1972")
+```
+
+### decimalLatitude
+
+### decimalLongitude
+
+### geodeticDatum
+
+### coordinateUncertaintyInMeters
+
+### georeferenceRemarks
+
+### identifiedBy
+
+
+
 ### identificationVerificationStatus
 
-```{r}
-occurrence %<>% mutate(dwc_identificationVerificationStatus = identificationVerificationStatus)
+
+```{r eval=FALSE, include=FALSE}
+occurrence %<>% mutate(dwc_identificationVerificationStatus = case_when(occurrence$`validation status` == 'onbekend' ~'unknown'
+                                                                      ,occurrence$`validation status` == 'goedgekeurd (automatische validatie)' ~ 'approved (automatic validation)'
+                                                                      , TRUE ~ `validation status`  ))
 ```
-
-## dynamicProperties
-
-```{r}
-occurrence %<>% mutate(dwc_dynamicProperties = '{"rbac":true,"rbac_allowed":"HIGHRES"}')
-```
-
-
 ### identificationRemarks
 
 
@@ -451,7 +458,7 @@ occurrence %<>% mutate(dwc_taxonRank = taxonRank )
 ### nomenclaturalCode
 
 ```{r}
-occurrence %<>% mutate(nomenclaturalCode = "ICBN") # e.g. "ICZN"
+occurrence %<>% mutate(nomenclaturalCode = "ICZN") # e.g. "ICZN"
 ```
 
 ### occurrenceStatus
@@ -466,7 +473,6 @@ occurrence %<>%
                                        ))
 head(occurrence, n = 5)
 ```
-
 
 
 
@@ -504,8 +510,6 @@ occurrence <- occurrence[ col_order]
 
 Preview data:
 
-
-
 ```{r}
 occurrence %>% head()
 ```
@@ -513,15 +517,15 @@ occurrence %>% head()
 Save to CSV:
 
 ```{r}
-write_csv(occurrence, here::here("datasets", "np-datavragen-data-vaatplanten-legacy", "data", "processed", "occurrence_planten_high_res.csv"), na = "")
+write_csv(occurrence, here::here("datasets", "np-datavragen-data-planten", "data", "processed", "occurrence_planten.csv"), na = "")
 ```
 
 
-# Visualize data on a map OriginalCoördinates
+Visualize data on a map
 
 ```{r}
-occurrenceMap <- occurrence  %>%
- filter(identifiedBy == "Yolan Bosteels")
+occurrenceMap <- occurrence 
+ ##%>%filter(identifiedBy == "Jeroen Vanden Borre")
 ```
 
 ```{r}
@@ -544,39 +548,6 @@ head(occurrenceMap)
 head(occurrence)
 
 mapview(occurrenceMap, xcol = "decimalLongitude", ycol = "decimalLatitude", crs = 4269, grid = FALSE)
-
-```
-
-# Visualize data on a map UTMCoördinates
-
-```{r}
-occurrenceMapUTM <- occurrence %>% 
- filter(identifiedBy == "Jeroen Vanden Borre")
-```
-
-```{r}
-occurrenceMapUTM$centroid_latitude <- as.numeric(occurrenceMapUTM$centroid_latitude)
-```
-
-```{r}
-occurrenceMapUTM$centroid_longitude <- as.numeric(occurrenceMapUTM$centroid_longitude)
-```
-
-```{r}
-head(occurrenceMapUTM)
-```
-```{r}
-problems(input_interim)
-```
-
-
-
-```{r}
-
-
-head(occurrence)
-
-mapview(occurrenceMapUTM, xcol = "centroid_longitude", ycol = "centroid_latitude", crs = 4269, grid = FALSE)
 
 ```
 
