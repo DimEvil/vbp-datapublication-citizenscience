@@ -313,6 +313,11 @@ occurrence %<>% mutate(dwc_lifestage = case_when(occurrence$`lifeStage` == 'onbe
 
 ### behavior
 
+```{r}
+occurrence %<>% mutate(dwc_behavior = behavior)
+```
+
+
 ### occurrenceRemarks
 
 ```{r}

@@ -1,6 +1,6 @@
 ---
 title: "Darwin Core Mapping UTM SQLite connection"
-subtitle: "VBP-INBO-waarnemingen-occurrences_202_mossen_wieren_hoge resolutie-legacy
+subtitle: "VBP-INBO-waarnemingen-occurrences_mossen_wieren_hoge resolutie-legacy
 author: "Dimitri Brosens"
 date: "`r Sys.Date()`"
 output:
@@ -55,7 +55,7 @@ File exported to csv
 # Verbind met SQLite
 
 ```{r eval=FALSE, include=FALSE}
-con <- dbConnect(SQLite(), (here::here("observation-2025-09-23-14-35-observations-instituut-voor-natuur-en-bosonderzoek.sqlite" )))
+con <- dbConnect(SQLite(), (here::here("observation-2026-01-29-15-46-observations-instituut-voor-natuur-en-bosonderzoek.sqlite" )))
 ```
 
 # Bekijk alle tabellen én views
@@ -65,7 +65,7 @@ dbListTables(con)  # views staan hier ook tussen
 ```
 
 ```{r eval=FALSE, include=FALSE}
-input_interim <- dbReadTable(con, "INBO_WNMN_mosses_lichens_protists_legacy")  # werkt ook voor views
+input_interim <- dbReadTable(con, "INBO_WNMN_MOSSES_LICHENS_PROTISTS_legacy")  # werkt ook voor views
 ```
 
 
@@ -73,12 +73,6 @@ input_interim <- dbReadTable(con, "INBO_WNMN_mosses_lichens_protists_legacy")  #
 
 ```{r}
 head(input_interim)
-```
-
-
-
-```{r eval=FALSE, include=FALSE}
-##input_interim <- read.csv(here::here("datasets", "np-datavragen-data-vaatplanten", "data", "interim", "occurrence_planten_inbo_wnmn.csv" ))
 ```
 
 
@@ -145,18 +139,6 @@ occurrence <- input_interim
 ```{r}
 occurrence %<>% select(-c(is_escape, embargo_date))
 ```
-## filter for species group
-
-Define which group of species to map to DwC (filtering was done in SQL)
-
-```{r eval=FALSE, include=FALSE}
-occurrence %<>%
-        filter(`species_group` == 'Planten') 
-        
-head(occurrence, n = 5 )
-
-```
-
 
 
 # Term mapping
@@ -170,7 +152,7 @@ Start with record-level terms which contain metadata about the dataset (which is
 ### datasetID
 
 ```{r}
-occurrence %<>% mutate(dwc_datasetID = "https://doi.org/10.15468/xxxx")
+occurrence %<>% mutate(dwc_datasetID = "no doi")
 ```
 
 ### add row numbers to genrate occurrenceID unique
@@ -335,6 +317,11 @@ occurrence %<>% mutate(dwc_lifestage = case_when(occurrence$`lifeStage` == 'onbe
 
 ### behavior
 
+
+```{r}
+occurrence %<>% mutate(dwc_behavior = behaviour)
+```
+
 ### occurrenceRemarks
 
 ```{r}
@@ -451,19 +438,6 @@ occurrence %<>% mutate(verbatimcoordinatesystem = "WGS84") #
 #occurrence %<>% mutate(verbatimSRS = "Belgian Datum 1972")
 ```
 
-### decimalLatitude
-
-### decimalLongitude
-
-### geodeticDatum
-
-### coordinateUncertaintyInMeters
-
-### georeferenceRemarks
-
-### identifiedBy
-
-
 
 ### identificationVerificationStatus
 
@@ -471,21 +445,11 @@ occurrence %<>% mutate(verbatimcoordinatesystem = "WGS84") #
 occurrence %<>% mutate(dwc_identificationVerificationStatus = identificationVerificationStatus)
 ```
 
-```{r eval=FALSE, include=FALSE}
-occurrence %<>% mutate(dwc_identificationVerificationStatus = case_when(occurrence$`validation status` == 'onbekend' ~'unknown'
-                                                                      ,occurrence$`validation status` == 'goedgekeurd (automatische validatie)' ~ 'approved (automatic validation)'
-                                                                      , TRUE ~ `validation status`  ))
-```
-
 ## dynamicProperties
 
 ```{r}
 occurrence %<>% mutate(dwc_dynamicProperties = '{"rbac":true,"rbac_allowed":"HIGHRES"}')
 ```
-
-
-### identificationRemarks
-
 
 
 
@@ -555,20 +519,6 @@ colnames(occurrence) <- str_remove(colnames(occurrence), "dwc_")
 
 ```{r}
 occurrence <- mutate_all(occurrence, as.character())
-```
-
-Define the order of the output columns
-
-```{r eval=FALSE, include=FALSE}
-col_order <- c( "type","language","license","rightsHolder","accessRights","datasetID"
-               ,"institutionCode","datasetName","basisOfRecord","occurrenceID","recordedBy"
-               ,"individualCount","organismQuantity","organismQuantityType","occurrenceStatus","occurrenceRemarks"
-               ,"samplingProtocol","samplingEffort"
-               ,"eventDate","continent","countryCode"
-               ,"decimalLatitude","decimalLongitude","geodeticDatum","coordinateUncertaintyInMeters"
-               ,"identifiedBy","scientificName","kingdom","taxonRank"
-               )
-occurrence <- occurrence[ col_order]
 ```
 
 Preview data:
