@@ -429,30 +429,11 @@ occurrence %<>% mutate(verbatimcoordinatesystem = "WGS84") #
 #occurrence %<>% mutate(verbatimSRS = "Belgian Datum 1972")
 ```
 
-### decimalLatitude
-
-### decimalLongitude
-
-### geodeticDatum
-
-### coordinateUncertaintyInMeters
-
-### georeferenceRemarks
-
-### identifiedBy
-
-
 
 ### identificationVerificationStatus
 
 ```{r}
 occurrence %<>% mutate(dwc_identificationVerificationStatus = identificationVerificationStatus)
-```
-
-```{r eval=FALSE, include=FALSE}
-occurrence %<>% mutate(dwc_identificationVerificationStatus = case_when(occurrence$`validation status` == 'onbekend' ~'unknown'
-                                                                      ,occurrence$`validation status` == 'goedgekeurd (automatische validatie)' ~ 'approved (automatic validation)'
-                                                                      , TRUE ~ `validation status`  ))
 ```
 
 ## dynamicProperties
@@ -533,20 +514,6 @@ colnames(occurrence) <- str_remove(colnames(occurrence), "dwc_")
 
 ```{r}
 occurrence <- mutate_all(occurrence, as.character())
-```
-
-Define the order of the output columns
-
-```{r eval=FALSE, include=FALSE}
-col_order <- c( "type","language","license","rightsHolder","accessRights","datasetID"
-               ,"institutionCode","datasetName","basisOfRecord","occurrenceID","recordedBy"
-               ,"individualCount","organismQuantity","organismQuantityType","occurrenceStatus","occurrenceRemarks"
-               ,"samplingProtocol","samplingEffort"
-               ,"eventDate","continent","countryCode"
-               ,"decimalLatitude","decimalLongitude","geodeticDatum","coordinateUncertaintyInMeters"
-               ,"identifiedBy","scientificName","kingdom","taxonRank"
-               )
-occurrence <- occurrence[ col_order]
 ```
 
 ##safety distinct
