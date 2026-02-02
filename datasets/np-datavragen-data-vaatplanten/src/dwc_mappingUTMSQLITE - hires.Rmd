@@ -55,8 +55,9 @@ File exported to csv
 # Verbind met SQLite
 
 ```{r eval=FALSE, include=FALSE}
-con <- dbConnect(SQLite(), (here::here("observations-instituut-voor-natuur-en-bosonderzoek_all.sqlite" )))
+con <- dbConnect(SQLite(), (here::here("observation-2026-01-29-15-46-observations-instituut-voor-natuur-en-bosonderzoek.sqlite" )))
 ```
+
 
 # Bekijk alle tabellen én views
 
@@ -65,7 +66,7 @@ dbListTables(con)  # views staan hier ook tussen
 ```
 
 ```{r eval=FALSE, include=FALSE}
-input_interim <- dbReadTable(con, "INBO_WNMN_PLANTS_native")  # werkt ook voor views
+input_interim <- dbReadTable(con, "INBO_WNMN_PLANTS_from2019")  # werkt ook voor views
 ```
 
 
@@ -77,11 +78,6 @@ head(input_interim)
 
 
 
-```{r eval=FALSE, include=FALSE}
-##input_interim <- read.csv(here::here("datasets", "np-datavragen-data-vaatplanten", "data", "interim", "occurrence_planten_inbo_wnmn.csv" ))
-```
-
-
 
 # Resultaat bekijken
 
@@ -89,7 +85,17 @@ head(input_interim)
 head(input_interim)
 ```
 
+# remove spec. indet.
 
+```{r}
+input_interim <- input_interim %>% 
+  mutate(
+    scientificName = scientificName %>% 
+      str_remove("\\s+(spec|indet)\\.?$") %>%  # verwijdert ' spec.', ' spec', ' indet.', ' indet'
+      str_trim()
+  )
+
+```
 
 
 Preview data:
@@ -136,17 +142,6 @@ occurrence <- input_interim
 occurrence %<>% select(-c(is_escape, embargo_date))
 ```
 ## filter for species group
-
-Define which group of species to map to DwC (filtering was done in SQL)
-
-```{r eval=FALSE, include=FALSE}
-occurrence %<>%
-        filter(`species_group` == 'Planten') 
-        
-head(occurrence, n = 5 )
-
-```
-
 
 
 # Term mapping
@@ -325,6 +320,10 @@ occurrence %<>% mutate(dwc_lifestage = case_when(occurrence$`lifeStage` == 'onbe
 
 ### behavior
 
+```{r}
+occurrence %<>% mutate(dwc_behavior = behaviour)
+```
+
 ### occurrenceRemarks
 
 ```{r}
@@ -495,8 +494,8 @@ occurrence %<>% mutate(dwc_vernacularName = vernacularName)
 
 ### kingdom
 
-```{r}
-occurrence %<>% mutate(dwc_kingdom = "Animalia")
+```{r eval=FALSE, include=FALSE}
+occurrence %<>% mutate(dwc_kingdom = "Plantae")
 ```
 
 
@@ -569,10 +568,121 @@ Preview data:
 occurrence %>% head()
 ```
 
+### add function for scientificNameAuthorship (Bijgevoegd stuk!!!!!)
+
+## unique names
+
+```{r}
+unique_names <- occurrence %>%
+  distinct(scientificName) %>%
+  pull(scientificName)
+
+```
+```{r}
+get_backbone_info <- function(name) {
+  res <- tryCatch({
+    gbif_res <- name_backbone(name = name)
+    tibble(
+      scientificName = name,
+      scientificNameAuthorship = gbif_res$authorship %||% NA,
+      canonicalName = gbif_res$canonicalName %||% NA,
+      taxonKey = gbif_res$usageKey %||% NA,
+      taxonomicStatus = gbif_res$status %||% NA,
+      matchType = gbif_res$matchType %||% NA
+    )
+  }, error = function(e) {
+    tibble(
+      scientificName = name,
+      scientificNameAuthorship = NA,
+      canonicalName = NA,
+      taxonKey = NA,
+      taxonomicStatus = NA,
+      matchType = NA
+    )
+  })
+  return(res)
+}
+```
+
+```{r}
+gbif_lookup <- map_dfr(unique_names, get_backbone_info)
+```
+
+```{r}
+get_taxon_info <- function(taxonKey) {
+  tryCatch({
+    res <- name_usage(taxonKey)
+    tibble(
+      taxonKey = taxonKey,
+      scientificName = res$data$scientificName,
+      canonicalName = res$data$canonicalName,
+      scientificNameAuthorship = res$data$authorship,
+      rank = res$data$rank,
+      status = res$data$status,
+      kingdom = res$data$kingdom,
+      phylum = res$data$phylum,
+      class = res$data$class,
+      order = res$data$order,
+      family = res$data$family,
+      genus = res$data$genus
+    )
+  }, error = function(e) {
+    tibble(
+      taxonKey = taxonKey,
+      scientificName = NA,
+      canonicalName = NA,
+      scientificNameAuthorship = NA,
+      rank = NA,
+      status = NA,
+      kingdom = NA,
+      phylum = NA,
+      class = NA,
+      order = NA,
+      family = NA,
+      genus = NA
+    )
+  })
+}
+```
+
+```{r}
+gbif_info <- map_dfr(gbif_lookup$taxonKey, get_taxon_info)
+```
+
+maak GBIF_info uniek
+
+```{r}
+gbif_info_unique <- gbif_info %>%
+  distinct(canonicalName, .keep_all = TRUE)
+```
+
+```{r}
+duplicated_rows <- gbif_info %>%
+  group_by(canonicalName) %>%
+  filter(n() > 1) %>%
+  ungroup()
+```
+
+
+
+# Left join: behoud alle rijen van occurrence
+```{r}
+occurrence_joined <- occurrence %>%
+  left_join(gbif_info_unique, by = c("scientificName" = "canonicalName"))
+```
+```{r}
+occurrence_joined <- occurrence_joined %>%
+  distinct(occurrenceID, .keep_all = TRUE)
+```
+
+
+
+
+
 Save to CSV:
 
 ```{r}
-write_csv(occurrence, here::here("datasets", "np-datavragen-data-vaatplanten", "data", "processed", "occurrence_planten_high_res.csv"), na = "")
+write_csv(occurrence_joined, here::here("datasets", "np-datavragen-data-vaatplanten", "data", "processed", "occurrence_planten_high_res.csv"), na = "")
 ```
 
 
