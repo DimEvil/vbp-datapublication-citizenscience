@@ -1,6 +1,6 @@
 ---
 title: "Darwin Core Mapping UTM SQLite connection"
-subtitle: "VBP-INBO-waarnemingen-occurrences_202_gewervelden_hoge resolutie
+subtitle: "VBP-INBO-waarnemingen-occurrences_2026_gewervelden_hoge resolutie
 author: "Dimitri Brosens"
 date: "`r Sys.Date()`"
 output:
@@ -52,11 +52,13 @@ File exported to csv
 
 #load and list files
 
+
 # Verbind met SQLite
 
 ```{r eval=FALSE, include=FALSE}
-con <- dbConnect(SQLite(), (here::here("observations-instituut-voor-natuur-en-bosonderzoek_all.sqlite" )))
+con <- dbConnect(SQLite(), (here::here("observation-2026-01-29-15-46-observations-instituut-voor-natuur-en-bosonderzoek.sqlite" )))
 ```
+
 
 # Bekijk alle tabellen én views
 
@@ -65,7 +67,7 @@ dbListTables(con)  # views staan hier ook tussen
 ```
 
 ```{r eval=FALSE, include=FALSE}
-input_interim <- dbReadTable(con, "INBO_WNMN_chordata_native")  # werkt ook voor views
+input_interim <- dbReadTable(con, "INBO_WNMN_CHORDATA_from2019")  # werkt ook voor views
 ```
 
 
@@ -77,18 +79,18 @@ head(input_interim)
 
 
 
-```{r eval=FALSE, include=FALSE}
-##input_interim <- read.csv(here::here("datasets", "np-datavragen-data-vaatplanten", "data", "interim", "occurrence_planten_inbo_wnmn.csv" ))
-```
 
 
-
-# Resultaat bekijken
+# remove spec.
 
 ```{r}
-head(input_interim)
+input_interim <- input_interim %>% 
+  mutate(
+    scientificName = scientificName %>% 
+      str_remove("\\s+spec\\.?$") %>%  # verwijdert ' spec.' of ' spec'
+      str_trim()
+  )
 ```
-
 
 
 
@@ -135,18 +137,6 @@ occurrence <- input_interim
 ```{r}
 occurrence %<>% select(-c(is_escape, embargo_date))
 ```
-## filter for species group
-
-Define which group of species to map to DwC (filtering was done in SQL)
-
-```{r eval=FALSE, include=FALSE}
-occurrence %<>%
-        filter(`species_group` == 'Planten') 
-        
-head(occurrence, n = 5 )
-
-```
-
 
 
 # Term mapping
@@ -325,6 +315,10 @@ occurrence %<>% mutate(dwc_lifestage = case_when(occurrence$`lifeStage` == 'onbe
 
 ### behavior
 
+```{r}
+occurrence %<>% mutate(dwc_behavior = behaviour)
+```
+
 ### occurrenceRemarks
 
 ```{r}
@@ -461,11 +455,6 @@ occurrence %<>% mutate(verbatimcoordinatesystem = "WGS84") #
 occurrence %<>% mutate(dwc_identificationVerificationStatus = identificationVerificationStatus)
 ```
 
-```{r eval=FALSE, include=FALSE}
-occurrence %<>% mutate(dwc_identificationVerificationStatus = case_when(occurrence$`validation status` == 'onbekend' ~'unknown'
-                                                                      ,occurrence$`validation status` == 'goedgekeurd (automatische validatie)' ~ 'approved (automatic validation)'
-                                                                      , TRUE ~ `validation status`  ))
-```
 
 ## dynamicProperties
 
@@ -511,7 +500,7 @@ occurrence %<>% mutate(dwc_taxonRank = taxonRank )
 ### nomenclaturalCode
 
 ```{r}
-occurrence %<>% mutate(nomenclaturalCode = "ICBN") # e.g. "ICZN"
+occurrence %<>% mutate(nomenclaturalCode = "ICZN") # e.g. "ICZN"
 ```
 
 ### occurrenceStatus
@@ -545,20 +534,6 @@ colnames(occurrence) <- str_remove(colnames(occurrence), "dwc_")
 
 ```{r}
 occurrence <- mutate_all(occurrence, as.character())
-```
-
-Define the order of the output columns
-
-```{r eval=FALSE, include=FALSE}
-col_order <- c( "type","language","license","rightsHolder","accessRights","datasetID"
-               ,"institutionCode","datasetName","basisOfRecord","occurrenceID","recordedBy"
-               ,"individualCount","organismQuantity","organismQuantityType","occurrenceStatus","occurrenceRemarks"
-               ,"samplingProtocol","samplingEffort"
-               ,"eventDate","continent","countryCode"
-               ,"decimalLatitude","decimalLongitude","geodeticDatum","coordinateUncertaintyInMeters"
-               ,"identifiedBy","scientificName","kingdom","taxonRank"
-               )
-occurrence <- occurrence[ col_order]
 ```
 
 Preview data:
