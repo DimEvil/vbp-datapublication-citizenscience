@@ -83,7 +83,7 @@ head(input_interim)
 
 # remove spec.
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 input_interim <- input_interim %>% 
   mutate(
     scientificName = scientificName %>% 
@@ -91,7 +91,15 @@ input_interim <- input_interim %>%
       str_trim()
   )
 ```
+```{r}
+input_interim <- input_interim %>% 
+  mutate(
+    scientificName = scientificName %>% 
+      str_remove("\\s+(spec|indet)\\.?$") %>%  # verwijdert ' spec.', ' spec', ' indet.', ' indet'
+      str_trim()
+  )
 
+```
 
 
 Preview data:
