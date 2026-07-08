@@ -1,4 +1,4 @@
-CREATE VIEW  INBO_WNMN_PLANTS_native AS
+CREATE VIEW  INBO_WNMN_PLANTS_from2019 AS
 
 SELECT 
 o.id  as occurrenceID
@@ -250,7 +250,7 @@ LEFT JOIN species_type st ON st.id = s.type
 LEFT JOIN life_stage ls ON ls.id = o.life_stage
 LEFT JOIN activity a ON a.id = o.activity
 LEFT JOIN observation_method om ON om.id = o.method
-LEFT JOIN observation_type ot ON ot.id = o.type
+--LEFT JOIN observation_type ot ON ot.id = o.type
 LEFT JOIN location l ON l.id = o.location
 LEFT JOIN validation_status vs ON vs.id = o.validation_status
 LEFT JOIN country_division cv ON cv.id = o.country_division
@@ -260,6 +260,8 @@ WHERE sg.name =  'Planten'
 --AND u.name = 'Heidi Demolder'
 AND NP.scientificName IS NULL
 --AND o.notes IS NOT NULL
+AND o.date >= '2019-01-01'
+
 
 
 --WHERE scientificName = ''
