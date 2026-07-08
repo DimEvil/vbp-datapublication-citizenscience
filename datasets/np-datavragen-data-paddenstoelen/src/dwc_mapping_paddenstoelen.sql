@@ -1,4 +1,4 @@
---CREATE VIEW  INBO_WNMN_paddestoelen_native AS
+CREATE VIEW INBO_WNMN_FUNGI_from2019 AS
 
 SELECT 
 o.id  as occurrenceID
@@ -6,16 +6,22 @@ o.id  as occurrenceID
 	, o.time
 	, s.name as vernacularName
 	, s.scientific_name as scientificName
-	,NPa.scientificName as scientificNameGBIF
+	, NP.scientificName as scientificNameGBIF
 	, CASE 
         	WHEN st.name = 'Hybride' THEN 'hybrid'
 			WHEN st.name = 'Ondersoort' THEN 'subspecies'
+			WHEN st.name = 'ondersoort' THEN 'subspecies'
 			WHEN st.name = 'Synoniem' THEN 'species'
+			WHEN st.name = 'synoniem' THEN 'species'
 			WHEN st.name = 'Soort' THEN 'species'
+			WHEN st.name = 'soort' THEN 'species'
 			WHEN st.name = 'Variëteit' THEN 'varietas'
+			WHEN st.name = 'variëteit' THEN 'varietas'
 			WHEN st.name = 'Verzamelsoort' THEN 'informal group'
+			WHEN st.name = 'verzamelsoort' THEN 'informal group'
 			WHEN st.name = 'forma' THEN 'forma'
-					ELSE 'Check needed'
+			WHEN st.name = 'Forma' THEN 'forma'
+					ELSE st.name
 					END as taxonRank
 	, sg.name as species_group
 	,CASE  
@@ -228,7 +234,9 @@ o.id  as occurrenceID
 	, vs.name as identificationVerificationStatus_nl
 	, CASE 
 	WHEN vs.name = 'goedgekeurd (automatische validatie)'  THEN 'automatic validation'
-	WHEN vs.name = 'onbekend' THEN 'validated'
+	WHEN vs.name = '(nog) niet te beoordelen'  THEN 'to be confirmed'
+	WHEN vs.name = 'onbekend' AND is_certain = '1'  THEN 'validated'
+	WHEN vs.name = 'onbekend' AND is_certain = '0'  THEN 'validated, high probability'
 	WHEN vs.name = 'goedgekeurd (met bewijs)' THEN 'validated, with evidence'
 	WHEN vs.name = 'goedgekeurd (aannemelijk)' THEN 'validated, high probability'
 	ELSE vs.name
@@ -250,22 +258,19 @@ LEFT JOIN species_type st ON st.id = s.type
 LEFT JOIN life_stage ls ON ls.id = o.life_stage
 LEFT JOIN activity a ON a.id = o.activity
 LEFT JOIN observation_method om ON om.id = o.method
-LEFT JOIN observation_type ot ON ot.id = o.type
+--LEFT JOIN observation_type ot ON ot.id = o.type
 LEFT JOIN location l ON l.id = o.location
 LEFT JOIN validation_status vs ON vs.id = o.validation_status
 LEFT JOIN country_division cv ON cv.id = o.country_division
 LEFT JOIN alienplantsNP NP ON NP.species = s.scientific_name
-LEFT JOIN alienanimalsNP NPa ON NPa.species = s.scientific_name
-WHERE sg.name IN  ('Paddenstoelen')
---AND sg.name IN  ('Reptielen en amfibieën','Vogels','Vissen')
---AND lat > 50.67
---AND sg.name IN  ('Vissen')
+LEFT JOIN alienanimalsNP_stijn NPa ON NPa.species = s.scientific_name
+
 --AND u.name = 'Heidi Demolder'
-AND NPa.scientificName IS NULL
-AND O.date > '01-01-2025'
-
+AND NP.scientificName IS NULL
 --AND o.notes IS NOT NULL
---AND s.name = 'Neovison vison'
 
+WHERE sg.name IN  ('Paddenstoelen')
+AND o.date >= '2019-01-01'
+AND NP.scientificName IS NULL
 
 --WHERE scientificName = ''
