@@ -56,7 +56,7 @@ File exported to csv
 # Verbind met SQLite
 
 ```{r eval=FALSE, include=FALSE}
-con <- dbConnect(SQLite(), (here::here("observation-2026-01-29-15-46-observations-instituut-voor-natuur-en-bosonderzoek.sqlite" )))
+con <- dbConnect(SQLite(), (here::here("observation-2026-07-02-15-50-observations-instituut-voor-natuur-en-bosonderzoek.sqlite" )))
 ```
 
 

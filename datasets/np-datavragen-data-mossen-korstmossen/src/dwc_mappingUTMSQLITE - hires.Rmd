@@ -1,6 +1,6 @@
 ---
 title: "Darwin Core Mapping UTM SQLite connection"
-subtitle: "VBP-INBO-waarnemingen-occurrences_202_mossen_wieren_hoge resolutie
+subtitle: "VBP-INBO-waarnemingen-occurrences_2026_mossen_wieren_hoge resolutie
 author: "Dimitri Brosens"
 date: "`r Sys.Date()`"
 output:
@@ -55,7 +55,7 @@ File exported to csv
 # Verbind met SQLite
 
 ```{r eval=FALSE, include=FALSE}
-con <- dbConnect(SQLite(), (here::here("observation-2026-01-29-15-46-observations-instituut-voor-natuur-en-bosonderzoek.sqlite" )))
+con <- dbConnect(SQLite(), (here::here("observation-2026-07-02-15-50-observations-instituut-voor-natuur-en-bosonderzoek.sqlite" )))
 ```
 
 
@@ -66,7 +66,7 @@ dbListTables(con)  # views staan hier ook tussen
 ```
 
 ```{r eval=FALSE, include=FALSE}
-input_interim <- dbReadTable(con, "INBO_WNMN_MOSSES_LICHENS_PROTISTS_from2019")  # werkt ook voor views
+input_interim <- dbReadTable(con, "INBO_WNMN_mossen_wieren_native")  # werkt ook voor views
 ```
 
 

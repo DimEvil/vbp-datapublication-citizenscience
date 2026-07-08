@@ -1,4 +1,4 @@
---CREATE VIEW  INBO_WNMN_mossen_wieren_native AS
+CREATE VIEW  INBO_WNMN_mossen_wieren_native AS
 
 SELECT 
 o.id  as occurrenceID
@@ -241,7 +241,7 @@ o.id  as occurrenceID
 	, u.name as recordedBy
 	, u.name as indentifiedBy
 	, cv.name as stateProvince
-
+--SELECT *
 FROM observation o
 INNER JOIN user u ON u.id = o.user
 INNER JOIN species s ON s.id = o.species
@@ -250,7 +250,7 @@ LEFT JOIN species_type st ON st.id = s.type
 LEFT JOIN life_stage ls ON ls.id = o.life_stage
 LEFT JOIN activity a ON a.id = o.activity
 LEFT JOIN observation_method om ON om.id = o.method
-LEFT JOIN observation_type ot ON ot.id = o.type
+--LEFT JOIN observation_type ot ON ot.id = o.type
 LEFT JOIN location l ON l.id = o.location
 LEFT JOIN validation_status vs ON vs.id = o.validation_status
 LEFT JOIN country_division cv ON cv.id = o.country_division
@@ -262,7 +262,7 @@ WHERE sg.name IN  ('Mossen en korstmossen','Algen, wieren en eencelligen')
 --AND sg.name IN  ('Vissen')
 --AND u.name = 'Heidi Demolder'
 AND NP.scientificName IS NULL
-AND O.date > '01-01-2025'
+AND o.date >= '2019-01-01'
 
 --AND o.notes IS NOT NULL
 --AND s.name = 'Neovison vison'
