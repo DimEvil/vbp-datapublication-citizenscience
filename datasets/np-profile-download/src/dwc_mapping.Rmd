@@ -35,7 +35,7 @@ library(sp)             # coordinate transformation
 library(sf)             # coordinate transformation
 library(lubridate)      # for the date
 library(ggplot2)        # for map
-#library(mapview)
+library(mapview)
 ```
 
 # Read source data
@@ -125,6 +125,16 @@ head(data)
 input_interim <- data
 ```
 
+# Gebied afbakenen indien nodig
+```{r}
+wkt_gebied <- "MULTIPOLYGON (((4.341326951980591 50.73784709823651, 4.340962171554565 50.73899458638018, 4.340500831604004 50.73987046077545, 4.3412840366363525 50.739938357331205, 4.342828989028931 50.73874336356925, 4.343204498291016 50.737358219007206, 4.342432022094727 50.73604093568358, 4.33884859085083 50.73511745724222, 4.337786436080933 50.73768413906042, 4.341326951980591 50.73784709823651)))"
+```
+
+```{r}
+polygoon_sf <- st_as_sfc(wkt_gebied, crs = 4326)
+```
+
+
 
 
 Preview data:
@@ -146,6 +156,13 @@ input_interim %<>% remove_empty("rows")
 ```{r}
 input_interim %>% head(n = 5)
 ```
+
+remove spec. indet.
+
+
+
+
+
 
 # Georeference source data
 
@@ -195,7 +212,7 @@ Start with record-level terms which contain metadata about the dataset (which is
 ### datasetID
 
 ```{r}
-occurrence %<>% mutate(dwc_datasetID = "https://doi.org/10.15468/XXXXX")
+occurrence %<>% mutate(dwc_datasetID = "https://doi.org/10.15468/qnfvxw")
 ```
 
 ### add row numbers to genrate occurrenceID unique
@@ -221,7 +238,7 @@ occurrence %<>% mutate(dwc_language = "en") # e.g. "en"
 ### license
 
 ```{r}
-occurrence %<>% mutate(dwc_license = "http://creativecommons.org/publicdomain/zero/1.0/") 
+occurrence %<>% mutate(dwc_license = "https://creativecommons.org/licenses/by-nc/4.0/deed.nl") 
 # e.g. "http://creativecommons.org/publicdomain/zero/1.0/"
 ```
 
@@ -251,13 +268,13 @@ occurrence %<>% mutate(dwc_references = link)
 ### institutionCode
 
 ```{r}
-occurrence %<>% mutate(dwc_institutionCode = "INBO") # e.g. "INBO"
+occurrence %<>% mutate(dwc_institutionCode = "NATUBRABZB ") # e.g. "INBO"
 ```
 
 ### datasetName
 
 ```{r}
-occurrence %<>% mutate(dwc_datasetName = "VBP - Citizen science Occurrences of Bees, wasps, and ants (Apidae, Vespidae, Sphecidae and Formicidae in  Flanders, Belgium") # e.g. "Checklist of non-native freshwater fishes in Flanders, Belgium"
+occurrence %<>% mutate(dwc_datasetName = "VBP - Citizen science Occurrences of a former sand quarry by NATUBRABZB in Flanders, Belgium")
 ```
 
 The following terms contain information about the taxon:
@@ -317,7 +334,7 @@ occurrence %<>%  mutate(dwc_organismQuantityType = 'individuals')
 ### sex
 
 ```{r}
-occurrence %<>% mutate(dwc_sex = case_when(occurrence$sex == 'u' ~'unknown'
+occurrence %<>% mutate(dwc_sex = case_when(occurrence$sex == 'U' ~'unknown'
                                        ,occurrence$sex == 'F' ~'female'
                                        ,occurrence$sex == 'M' ~'male',
                                        TRUE ~ sex))
@@ -344,11 +361,12 @@ occurrence %<>% rename(dwc_occurrenceRemarks = notes)
 ## samplingProtocol
 
 ```{r}
-occurrence %<>% mutate(dwc_samplingEffort = 'casual observation')
+occurrence %<>% mutate(dwc_samplingEffort = case_when(occurrence$`counting method` == 'onbekend' ~'unknown'
+                                                      , TRUE ~`counting method`))
 ```
 
 ```{r}
-occurrence %<>% rename(dwc_samplingProtocol = `counting method`)
+occurrence %<>% mutate(dwc_samplingProtocol = `counting method`)
  
 
 
@@ -400,11 +418,18 @@ occurrence %<>%
 ```
 ### coordinateUncertaintyInMeters
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 occurrence %<>%
   mutate(dwc_coordinateUncertaintyInMeters = accuracy)
 ```
 
+
+Run deze chunk als vaste waarde voor onzekerheid is vastgelegd op bijvoorbeeld '100' meter
+
+```{r}
+occurrence %<>%
+  mutate(dwc_coordinateUncertaintyInMeters = "100")
+```
 
 ### continent
 
@@ -468,6 +493,12 @@ occurrence %<>% mutate(dwc_identifiedBy = Extracted)
 ```{r}
 occurrence %<>% mutate(dwc_identificationVerificationStatus = case_when(occurrence$`validation status` == 'onbekend' ~'unknown'
                                                                       ,occurrence$`validation status` == 'goedgekeurd (automatische validatie)' ~ 'approved (automatic validation)'
+                                                                      ,occurrence$`validation status` == 'goedgekeurd (met bewijs)' ~ 'approved (with proof)'
+                                                                      ,occurrence$`validation status` == 'goedgekeurd (aannemelijk)' ~ 'approved (plausible)'
+                                                                      ,occurrence$`validation status` == '(nog) niet te beoordelen' ~ 'not yet approved'
+                                                                      ,occurrence$`validation status` == 'afgewezen' ~ 'rejected'
+                                                                      ,occurrence$`validation status` == 'goedgekeurd (automatische validatie)' ~ 'approved (automatic validation)'
+                                                                      ,occurrence$`validation status` == 'goedgekeurd (automatische validatie)' ~ 'approved (automatic validation)'
                                                                       , TRUE ~ `validation status`  ))
 ```
 ### identificationRemarks
@@ -485,7 +516,15 @@ occurrence %<>% mutate(dwc_identificationRemarks = `validator name`)
 occurrence %<>% mutate(dwc_scientificName = `scientific name`)
 ```
 
+```{r}
+occurrence <- occurrence %>% 
+  mutate(
+    dwc_scientificName = dwc_scientificName %>% 
+      str_remove("\\s+(spec|indet)\\.?$") %>%  # verwijdert ' spec.', ' spec', ' indet.', ' indet'
+      str_trim()
+  )
 
+```
 ### vernacularName 
 
 ```{r}
@@ -496,7 +535,25 @@ occurrence %<>% mutate(dwc_vernacularName = `species name`)
 ### kingdom
 
 ```{r}
-occurrence %<>% mutate(dwc_kingdom = "Animalia")
+occurrence %<>% mutate(dwc_kingdom = case_when(occurrence$`species group` == 'Paddenstoelen' ~'Fungi',
+                                              occurrence$`species group` == 'Zoogdieren' ~'Animalia',
+                                              occurrence$`species group` == 'Vogels' ~'Animalia',
+                                              occurrence$`species group` == 'Bijen, wespen en mieren' ~'Animalia',
+                                              occurrence$`species group` == 'Geleedpotigen (overig)' ~'Animalia',
+                                              occurrence$`species group` == 'Reptielen en amfibieën' ~'Animalia',
+                                              occurrence$`species group` == 'Sprinkhanen en krekels' ~'Animalia',
+                                              occurrence$`species group` == 'Mollusca (Weekdieren)' ~'Animalia',
+                                              occurrence$`species group` == 'Kevers' ~'Animalia',
+                                              occurrence$`species group` == "Nachtvlinders en micro's" ~"Animalia",
+                                              occurrence$`species group` == 'Vliegen en muggen' ~'Animalia',
+                                              occurrence$`species group` == 'Wantsen en cicaden' ~'Animalia',
+                                              occurrence$`species group` == 'Libellen' ~'Animalia',
+                                              occurrence$`species group` == 'Dagvlinders' ~'Animalia',
+                                              occurrence$`species group` == 'Insecten (overig)' ~'Animalia',
+                                              occurrence$`species group` == 'Planten' ~'Plantae',
+                                              occurrence$`species group` == 'Mossen en korstmossen' ~'Plantae',
+                                              occurrence$`species group` == 'Overige ongewervelden' ~'Animalia',
+                                              TRUE ~ `species group` ))
 ```
 
 ### scientificNameAuthorship
@@ -509,7 +566,9 @@ occurrence %<>% mutate(dwc_kingdom = "Animalia")
 ### taxonRank
 
 ```{r}
-occurrence %<>% mutate(dwc_taxonRank = case_when(occurrence$`species type` == 'Soort' ~'species'
+occurrence %<>% mutate(dwc_taxonRank = case_when(occurrence$`species type` == 'soort' ~'species',
+                                                 occurrence$`species type` == 'Soort' ~'species',
+                                                 occurrence$`species type` == 'verzamelsoort' ~'species aggregate'
                                                  , TRUE ~ `species type` ))
 ```
 
@@ -517,7 +576,7 @@ occurrence %<>% mutate(dwc_taxonRank = case_when(occurrence$`species type` == 'S
 
 ### nomenclaturalCode
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 occurrence %<>% mutate(nomenclaturalCode = "ICZN") # e.g. "ICZN"
 ```
 
@@ -535,23 +594,52 @@ head(occurrence, n = 5)
 ```
 
 
+# filteren met polygon
+
+```{r}
+occurrence_sf <- st_as_sf(occurrence, 
+                          coords = c("dwc_decimalLongitude", "dwc_decimalLatitude"), 
+                          crs = 4326, 
+                          remove = FALSE) # remove = FALSE behoudt de originele X/Y kolommen
+```
+
+
+
+```{r}
+occurrence_gefilterd <- st_intersection(occurrence_sf, polygoon_sf)
+```
+
+
+```{r}
+occurrence_final <- st_drop_geometry(occurrence_gefilterd)
+```
+
+```{r}
+occurrence_final <- occurrence_final %<>% mutate(dwc_decimalLatitude  = lat )
+```
+
+
+```{r}
+occurrence_final <- occurrence_final %<>% mutate(dwc_decimalLongitude  = lng )
+```
+
 
 ## Post-processing
 
 ```{r}
 
-occurrence %<>% select(starts_with("dwc_"))
+occurrence_final %<>% select(starts_with("dwc_"))
 ```
 
 
 
 ```{r}
-colnames(occurrence) <- str_remove(colnames(occurrence), "dwc_")
+colnames(occurrence_final) <- str_remove(colnames(occurrence_final), "dwc_")
 
 ```
 
 ```{r}
-occurrence <- mutate_all(occurrence, as.character())
+occurrence_final <- mutate_all(occurrence_final, as.character())
 ```
 
 Define the order of the output columns
@@ -565,26 +653,26 @@ col_order <- c( "type","language","license","rightsHolder","accessRights","datas
                ,"decimalLatitude","decimalLongitude","geodeticDatum","coordinateUncertaintyInMeters"
                ,"identifiedBy","scientificName","kingdom","taxonRank"
                )
-occurrence <- occurrence[ col_order]
+occurrence_final <- occurrence_final[ col_order]
 ```
 
 Preview data:
 
 ```{r}
-occurrence %>% head()
+occurrence_final %>% head()
 ```
 
 Save to CSV:
 
 ```{r}
-write_csv(occurrence, here::here("datasets", "np-profile-download", "data", "processed", "occurrence.csv"), na = "")
+write_csv(occurrence_final, here::here("datasets", "np-profile-download", "data", "processed", "occurrence_NATUBRABZB .csv"), na = "")
 ```
 
 
 Visualize data on a map
 
 ```{r}
-occurrenceMap <- occurrence
+occurrenceMap <- occurrence_final
 ```
 
 ```{r}
