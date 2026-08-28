@@ -55,7 +55,7 @@ File exported to csv
 # Verbind met SQLite
 
 ```{r eval=FALSE, include=FALSE}
-con <- dbConnect(SQLite(), (here::here("observations-instituut-voor-natuur-en-bosonderzoek_all.sqlite" )))
+con <- dbConnect(SQLite(), (here::here("observation-2026-07-02-15-50-observations-instituut-voor-natuur-en-bosonderzoek.sqlite" )))
 ```
 
 # Bekijk alle tabellen én views
@@ -65,7 +65,7 @@ dbListTables(con)  # views staan hier ook tussen
 ```
 
 ```{r eval=FALSE, include=FALSE}
-input_interim <- dbReadTable(con, "INBO_WNMN_paddestoelen_native")  # werkt ook voor views
+input_interim <- dbReadTable(con, "INBO_WNMN_FUNGI_from2019")  # werkt ook voor views
 ```
 
 
@@ -707,7 +707,7 @@ mapview(occurrenceMap, xcol = "decimalLongitude", ycol = "decimalLatitude", crs 
 
 ```{r}
 occurrenceMapUTM <- occurrence %>% 
- filter(identifiedBy == "Jeroen Vanden Borre")
+ filter(identifiedBy == "Yolan Bosteels")
 ```
 
 ```{r}
