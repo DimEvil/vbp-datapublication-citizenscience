@@ -55,7 +55,7 @@ File exported to csv
 # Verbind met SQLite
 
 ```{r eval=FALSE, include=FALSE}
-con <- dbConnect(SQLite(), (here::here("observations-instituut-voor-natuur-en-bosonderzoek_all.sqlite" )))
+con <- dbConnect(SQLite(), (here::here("observation-2026-07-02-15-50-observations-instituut-voor-natuur-en-bosonderzoek.sqlite" )))
 ```
 
 # Bekijk alle tabellen én views
@@ -65,7 +65,7 @@ dbListTables(con)  # views staan hier ook tussen
 ```
 
 ```{r eval=FALSE, include=FALSE}
-input_interim <- dbReadTable(con, "INBO_WNMN_PLANTS_native")  # werkt ook voor views
+input_interim <- dbReadTable(con, "INBO_WNMN_PLANTS_from2019")  # werkt ook voor views
 ```
 
 
@@ -89,7 +89,17 @@ input_interim <- read.csv(here::here("datasets", "np-datavragen-data-vaatplanten
 head(input_interim)
 ```
 
+remove spec. indet.
 
+```{r}
+input_interim <- input_interim %>% 
+  mutate(
+    scientificName = scientificName %>% 
+      str_remove("\\s+(spec|indet)\\.?$") %>%  # verwijdert ' spec.', ' spec', ' indet.', ' indet'
+      str_trim()
+  )
+
+```
 
 
 Preview data:
